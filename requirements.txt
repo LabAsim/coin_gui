@@ -1,0 +1,6 @@
+matplotlib==3.9.2
+pandas==2.2.3
+pillow==11.0.0
+pycoingecko==3.1.0
+tkinter-tooltip==3.1.0
+colorama
