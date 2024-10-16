@@ -83,11 +83,18 @@ class Persistent:
                 for coin in Coin.thecoins:
                     # If not in parentheses, writerow will write every character of coin's name separately.
                     writer.writerow([coin])
-                print('Persistent>store>Coins saved to the file successfully!')
+                logger.debug('Persistent>store>Coins saved to the file successfully!')
                 # return True
-        except:
-            print('Persistent>store> !Warning: \tCoins cannot be saved!')
+        except Exception:
+            logger.exception('Persistent>store> !Warning: \tCoins cannot be saved!')
             # return False
+        with Db() as database:
+            logger.info(f"{database=}")
+            for coin in Coin.thecoins:
+                database.add_coins(coin=coin)
+
+
+
 
     @staticmethod
     def read_from_file():
@@ -138,8 +145,10 @@ class Mainpage:
         # entry.place(x=10, y=30)
         # entry.anchor('center')
         text_var.set("Add a coin")
-        entry.bind("<KeyRelease-Return>", lambda e: Mainpage.coin_call(self,
-                                                                       controller=self.controller))  # Without parentheses! https://www.tcl.tk/man/tcl8.4/TkCmd/keysyms.html
+        entry.bind(
+            "<KeyRelease-Return>",
+            lambda e: Mainpage.coin_call(self,controller=self.controller)
+        )  # Without parentheses! https://www.tcl.tk/man/tcl8.4/TkCmd/keysyms.html
         entry.bind("<KeyRelease-Return>", lambda e: entry.delete(0, 'end'), add=True)
         entry.focus()
         # Delete the message from the entry box when a key is pressed
@@ -586,14 +595,17 @@ class Secondpage:
         df2 = pd.DataFrame(data['market_caps'], columns=['Timestamp', 'Marketcap'])
         df3 = pd.DataFrame(data['total_volumes'], columns=['Timestamp', 'Total volumes'])
 
+        # Merge the dataframes and insert them into the db
         database = Db()
+        df_ = pd.DataFrame({"name": [f"{current_id_from_coin}" for i in range(0, len(df.index))]})
         df_total = df.copy()
+        df_total = df_.join(df_total)
+        # logger.debug(f"{df_total=}")
         df_total = df_total.merge(df2, how="left", on="Timestamp")
         df_total = df_total.merge(df3, how="left", on="Timestamp")
-
+        # logger.debug(f"{df_total=}")
         database.insert_coin_values(df=df_total, coin=current_id_from_coin)
-        if Verbose:
-            print(df, df2, df3)
+
         self.figure = plt.figure(1, figsize=(15, 15), dpi=100)
         ax1 = self.figure.add_subplot(211)
         # Max first, because int('Max') is invalid and will raise an error.
@@ -1015,7 +1027,7 @@ class App:
             # return Secondpage(self.note, name)
 
     def get_page_2(self, page_class):
-        '''Return the instance of a page given its class name as a string'''
+        """Return the instance of a page given its class name as a string"""
         try:
             for page in self.frames.values():
                 if str(page.__class__.__name__) == page_class:
@@ -1224,9 +1236,10 @@ class AskQuit(tkinter.Toplevel):
         askquit_topframe.pack(side='top', expand=True)
         valueLabel = ttk.Label(askquit_topframe, text="Do you want to quit?")
         valueLabel.pack(side='right', expand=True)
-        image = Image.open("images/questionmark.png")
+        image = Image.open("multimedia/images/questionmark.png")
         image = image.resize(
-            (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), Image.ANTIALIAS)
+            (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), Image.ANTIALIAS
+        )
         image = ImageTk.PhotoImage(image)
         image_label = ttk.Label(askquit_topframe, image=image)
         image_label.pack(side='left', expand=True, padx=10, pady=10)
