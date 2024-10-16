@@ -31,6 +31,22 @@ cg = CoinGeckoAPI()
 The current price of Ergo:  35365
 '''
 
+logger = logging.getLogger(__name__)
+if __name__ == "__main__":
+    logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
+    logging.getLogger("matplotlib.pyplot").setLevel(logging.WARNING)
+    logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
+    logging.getLogger("matplotlib.category").setLevel(logging.WARNING)
+    logging.getLogger("urllib3.connectionpool").setLevel(logging.WARNING)
+    console = color_logging(level=logging.DEBUG)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        force=True,
+        handlers=[console],
+    )  # Force is needed here to re config logging
+    # Init should be here so as the colors be rendered properly in fly.io
+    colorama.init(convert=True)
+
 
 class Coin:
     """ A class containing coins"""
