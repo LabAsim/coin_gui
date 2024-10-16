@@ -935,6 +935,22 @@ class App:
             underline=0
         )'''
 
+    def save_retrieve_available_coins(self):
+        """Checks if the saved info is old and replaces it with a new list of coins"""
+        with Db() as database:
+            available_coins_retrieved_settings_time = database.check_settings_time()
+            if (
+                    time.time() - available_coins_retrieved_settings_time > 86400
+            ):
+                database.save_settings_time()
+                available_coins_list = cg.get_coins_list()
+                logger.debug(f"Got a new coin list")
+                database.save_all_available_coins(coins=available_coins_list)
+                return available_coins_list
+
+            logger.debug(f"Fetching the saved list with available coins")
+            return database.retrieve_available_coins()
+
     def show_available_coins(self):
         """Show available coins from Coingecko"""
         '''[{'id': '0-5x-long-eos-token', 'symbol': 'eoshalf', 'name': '0.5X Long EOS Token'}]'''
