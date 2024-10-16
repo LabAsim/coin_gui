@@ -1,6 +1,8 @@
 import logging
 import sqlite3
+import time
 from contextlib import ContextDecorator
+from datetime import datetime
 
 import pandas
 
@@ -40,6 +42,29 @@ class Db(ContextDecorator):
         )
         self.conn.commit()
 
+        self.cursor.execute(
+
+            """
+            CREATE TABLE IF NOT EXISTS available_coins(
+                id TEXT PRIMARY KEY,
+                symbol TEXT,
+                name TEXT
+            );    
+            """
+        )
+        self.conn.commit()
+
+        self.cursor.execute(
+
+            """
+            CREATE TABLE IF NOT EXISTS settings(
+                id TEXT PRIMARY KEY,
+                unix_timestamp BIGINT
+            );    
+            """
+        )
+        self.conn.commit()
+
     def insert_coin_values(self, df: pandas.DataFrame, coin: str) -> None:
         """
         Inserts the prices etc. to the sqlite db.
@@ -62,6 +87,87 @@ class Db(ContextDecorator):
             ON CONFLICT(name) DO NOTHING;
             ''',
             [coin]
+        )
+        self.conn.commit()
+
+    def retrieve_coins(self) -> list:
+        """Retrieves the names from saved coins"""
+        cursor = self.conn.execute(
+            '''
+            SELECT name FROM saved_coins
+            '''
+        )
+        self.conn.commit()
+        rows = cursor.fetchall()
+
+        return rows
+
+    def save_single_available_coin(self, coin_tuple: tuple) -> None:
+        """Saves available coins to the db"""
+
+        # for dicti_of_coin in available_coins_list:
+        #     _id = dicti_of_coin['id']
+        #     symbol = dicti_of_coin['symbol']
+        #     name = dicti_of_coin['name']
+        #     _tuple = (_id, symbol, name)
+        self.conn.execute(
+            '''
+            INSERT INTO available_coins(id, symbol, name) values(?,?,?)
+            ON CONFLICT(id) DO NOTHING;
+            ''',
+            coin_tuple
+        )
+        self.conn.commit()
+
+    def save_all_available_coins(self, coins) -> None:
+
+        coins = pandas.DataFrame(coins)
+        logger.debug(f"{coins=}")
+        coins.to_sql(
+            name="available_coins", con=self.conn, if_exists="replace", index=False
+        )
+
+    def retrieve_available_coins(self) -> list:
+        """Retrieves the saved available coins"""
+        def dict_factory(cursor, row) -> dict:
+            """See https://docs.python.org/3.10/library/sqlite3.html#how-to-create-and-use-row-factories"""
+            fields = [column[0] for column in cursor.description]
+            return {key: value for key, value in zip(fields, row)}
+
+        self.conn.row_factory = dict_factory
+        cursor = self.conn.execute(
+            '''
+            SELECT * FROM available_coins
+            '''
+        )
+        rows = cursor.fetchall()
+        return rows
+
+
+    def check_settings_time(self) -> float:
+        """Checks if the settings time is today or a timestamp in the past"""
+
+        cursor = self.conn.execute(
+            '''
+            SELECT * FROM settings
+            '''
+        )
+        self.conn.commit()
+        rows = cursor.fetchall()
+        logger.debug(f"{rows=}")
+        for row in rows:
+            if "available_coins_retrieved" in row:
+                return row[1]
+        else:
+            return 0
+
+    def save_settings_time(self) -> None:
+        """Save the setting name and the unix timestamp"""
+        self.conn.execute(
+            '''
+            INSERT OR REPLACE INTO settings(id,unix_timestamp) values(?,?)
+            ''',
+            ["available_coins_retrieved", time.time()]
         )
         self.conn.commit()
 
