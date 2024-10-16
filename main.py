@@ -77,40 +77,22 @@ class Coin:
 class Persistent:
     """A class to store and retrieve a list of preferable coins"""
 
-    def __init__(self):
-        self.filename = 'coins.csv'
-
-    def retrieve(self):
-        try:
-            with open(self.filename, 'r', encoding='utf-8') as f:
-                reader = csv.reader(f, delimiter=';', quoting=csv.QUOTE_ALL)
-                for row in reader:
-                    Coin(row[0])
-
-            # return True
-        except FileNotFoundError as err:
-            print(f"Persistent>retrieve> Error in finding saved list of coins: {err}")
-            # return False
-
-    def store(self):
-        try:
-            with open(self.filename, 'w', newline='', encoding='utf-8') as f:
-                writer = csv.writer(f, delimiter=';', quoting=csv.QUOTE_ALL)
-                for coin in Coin.thecoins:
-                    # If not in parentheses, writerow will write every character of coin's name separately.
-                    writer.writerow([coin])
-                logger.debug('Persistent>store>Coins saved to the file successfully!')
-                # return True
-        except Exception:
-            logger.exception('Persistent>store> !Warning: \tCoins cannot be saved!')
-            # return False
+    @staticmethod
+    def retrieve():
+        """Retrieves the names from saved coins"""
         with Db() as database:
-            logger.info(f"{database=}")
+            coins = database.retrieve_coins()
+            logger.debug(f"{coins=}")
+            for coin in coins:
+                Coin(name=coin[0])
+
+    @staticmethod
+    def store():
+        """Stores the name of the coins to the db"""
+        with Db() as database:
             for coin in Coin.thecoins:
                 database.add_coins(coin=coin)
-
-
-
+            logger.debug(f"Coins saved")
 
     @staticmethod
     def read_from_file():
@@ -120,9 +102,11 @@ class Persistent:
                 reader = csv.reader(file, delimiter=';', quoting=csv.QUOTE_ALL)
                 for row in reader:
                     Coin(row[0])
-                print(f'{file.name} retrieved')
+                logger.debug(f'{file.name} retrieved')
         except FileNotFoundError as err:
-            print(f"Persistent>read_from_file> Error in finding saved list of coins: {err}")
+            logger.exception(f"Persistent>read_from_file> Error in finding saved list of coins: {err}")
+        except Exception:
+            logger.exception(msg="Error in reading from file")
 
 
 class Mainpage:
