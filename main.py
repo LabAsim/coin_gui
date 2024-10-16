@@ -6,6 +6,7 @@ import csv
 import logging
 import os
 import sys
+import threading
 import time
 import tkinter
 import tkinter as tk
@@ -147,7 +148,7 @@ class Mainpage:
         text_var.set("Add a coin")
         entry.bind(
             "<KeyRelease-Return>",
-            lambda e: Mainpage.coin_call(self,controller=self.controller)
+            lambda e: Mainpage.coin_call(self, controller=self.controller)
         )  # Without parentheses! https://www.tcl.tk/man/tcl8.4/TkCmd/keysyms.html
         entry.bind("<KeyRelease-Return>", lambda e: entry.delete(0, 'end'), add=True)
         entry.focus()
@@ -954,24 +955,18 @@ class App:
     def show_available_coins(self):
         """Show available coins from Coingecko"""
         '''[{'id': '0-5x-long-eos-token', 'symbol': 'eoshalf', 'name': '0.5X Long EOS Token'}]'''
-        available_coin_list = cg.get_coins_list()
-        for dicti_of_coin in available_coin_list:
-            id = dicti_of_coin['id']
-            symbol = dicti_of_coin['symbol']
-            name = dicti_of_coin['name']
-            tuple = (id, symbol, name)
-            MultiColumnTree.values.append(tuple)
-        if Verbose:
-            # print(f'available_coin_list: {available_coin_list}')
-            pass
-        tree = MultiColumnTree(self)
-        if Verbose:
-            # print(f'MultiColumnTree.values: {MultiColumnTree.values}')
-            pass
+        available_coins_list = self.save_retrieve_available_coins()
+        for dicti_of_coin in available_coins_list:
+            coin_id = dicti_of_coin["id"]
+            symbol = dicti_of_coin["symbol"]
+            name = dicti_of_coin["name"]
+            coin_tuple = (coin_id, symbol, name)
+            MultiColumnTree.values.append(coin_tuple)
+        tree = MultiColumnTree(controller=self)
 
     def main_menu_save(self):
         """Calls the Persistent class and saves the current list to the .csv file"""
-        Persistent.store(self.persistent)
+        Persistent.store()
 
     def submenu_show_coinlist(self):
         """Just shows the coinlist in the secondpage of the notebook(aka Secondpage class)"""
@@ -1390,20 +1385,7 @@ persist = Persistent()
 persist.retrieve()  # Retrieve the saved coin list
 debug = True
 
-logger = logging.getLogger(__name__)
 if __name__ == "__main__":
-    logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
-    logging.getLogger("matplotlib.pyplot").setLevel(logging.WARNING)
-    logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
-    logging.getLogger("matplotlib.category").setLevel(logging.WARNING)
-    console = color_logging(level=logging.DEBUG)
-    logging.basicConfig(
-        level=logging.DEBUG,
-        force=True,
-        handlers=[console],
-    )  # Force is needed here to re config logging
-    # Init should be here so as the colors be rendered properly in fly.io
-    colorama.init(convert=True)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     print(dir_path)
     logger.debug(f"{dir_path=}")
