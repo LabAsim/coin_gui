@@ -379,7 +379,7 @@ class Secondpage:
         """Retrieve the searched coin list in Secondpage.search_tree based on the term provided.
         If term=coin, retrieves only these coins.
         If term = None, it retrieves all the saved coins"""
-        print(f'Secondpage>retrieve_coin_list called with "{term}"')
+        logger.debug(f'Secondpage>retrieve_coin_list called with "{term}"')
         if term:
             logger.debug(f'Term : {term}')
             if len(self.search_tree) != 0:
@@ -1079,6 +1079,7 @@ class MultiColumnTree:
         self.controller = controller
         self.toplevel_coins = tk.Toplevel()
         self.toplevel_coins.geometry('800x500+0+0')
+        self.toplevel_coins.title('Available coins on CoinGecko')
         self.parentframe = ttk.Frame(self.toplevel_coins)
         self.parentframe.pack(expand=True, fill='both')
         # Search box
@@ -1135,12 +1136,13 @@ class MultiColumnTree:
             logger.debug(f'Term : {term}')
             if len(MultiColumnTree.search_tree) != 0:
                 MultiColumnTree.search_tree.clear()
-            # Search through the tuples
-            for tuple_coin in MultiColumnTree.values:
-                if term:
-                    for item in tuple_coin:
-                        if term.lower() in item.lower():
-                            if tuple_coin not in MultiColumnTree.search_tree:
+            # Retrieve the tuples from the db
+            with Db() as database:
+                listed_coins = database.retrieve_coins_based_on_term(term=term)
+                for tuple_coin in listed_coins:
+                    # for item in tuple_coin:
+                        # if term.lower() in item.lower():
+                        #     if tuple_coin not in MultiColumnTree.search_tree:
                                 MultiColumnTree.search_tree.append(tuple_coin)
             end = time.time()
             run_time = end - start
@@ -1359,7 +1361,6 @@ if __name__ == "__main__":
     persist = Persistent()
     persist.retrieve()  # Retrieve the saved coin list
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    print(dir_path)
     logger.debug(f"{dir_path=}")
     root = tk.Tk()  # First window
     font = tk.font.Font(size=11)
