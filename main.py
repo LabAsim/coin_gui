@@ -192,7 +192,7 @@ class Secondpage:
                         Secondpage.retrieved_coins.append(pair)
             Secondpage.retrieved_coins = sorted(Secondpage.retrieved_coins)
             logger.debug(f'The searched coins based on term: "{term}"  provided were successfully retrieved:'
-                              f'Secondpage.retrieved_coins: {Secondpage.retrieved_coins}')
+                         f'Secondpage.retrieved_coins: {Secondpage.retrieved_coins}')
         else:
             if len(Secondpage.retrieved_coins) != 0:
                 Secondpage.retrieved_coins.clear()
@@ -201,7 +201,7 @@ class Secondpage:
                 Secondpage.retrieved_coins.append(pair)
             Secondpage.retrieved_coins = sorted(Secondpage.retrieved_coins)
             logger.debug(f'The coins were successfully retrieved:'
-                              f'Secondpage.retrieved_coins: {Secondpage.retrieved_coins}')
+                         f'Secondpage.retrieved_coins: {Secondpage.retrieved_coins}')
 
     def __init__(self, note, name, controller):
         self.figure_toplevel = None
@@ -392,7 +392,7 @@ class Secondpage:
                             if tuple_coin not in Secondpage.search_tree:
                                 Secondpage.search_tree.append(tuple_coin)
             logger.debug(f'The searched coins in Secondpage treeview '
-                      f'based on term provided were successfully retrieved {Secondpage.search_tree}')
+                         f'based on term provided were successfully retrieved {Secondpage.search_tree}')
         # If term=''
         elif term == "":
             if len(Secondpage.search_tree) != 0:
@@ -415,8 +415,8 @@ class Secondpage:
                 for number, coin in enumerate(Secondpage.search_tree):
                     self.tree.insert("", tk.END, iid=str(number), values=coin)
             logger.debug(
-                    'Secondpage>fill_box_after_search(self): Search was successful: '
-                    'The results are now shown in Treeview'
+                'Secondpage>fill_box_after_search(self): Search was successful: '
+                'The results are now shown in Treeview'
             )
         except BaseException as err:
             raise err
@@ -498,8 +498,8 @@ class Secondpage:
             if not retrieve:
                 logger.debug(
                     f"Coin_prices.thecoins_prices: {Coin_prices.thecoins_prices} "
-                          f"{len(Coin_prices.thecoins_prices)}"
-                  )
+                    f"{len(Coin_prices.thecoins_prices)}"
+                )
 
                 if len(Coin_prices.thecoins_prices) != 0:
                     for i, coin in enumerate(Coin_prices.thecoins_prices):
@@ -507,7 +507,8 @@ class Secondpage:
                 else:
                     print(f"Secondpage>fill_box_with_prices> Coin_prices.thecoins_prices is empty")
             elif retrieve:
-                logger.debug(f"Secondpage>fill_box_with_prices> Secondpage.retrieved_coins: {Secondpage.retrieved_coins}")
+                logger.debug(
+                    f"Secondpage>fill_box_with_prices> Secondpage.retrieved_coins: {Secondpage.retrieved_coins}")
                 if len(Secondpage.retrieved_coins) != 0:
                     for i, tuple_coin in enumerate(Secondpage.retrieved_coins):
                         self.tree.insert("", tk.END, iid=str(i), values=[tuple_coin[0], tuple_coin[1]])
@@ -862,8 +863,10 @@ class App:
         print('The initial pages are: ', self.frames)
         self.persistent = Persistent()  # to call an instance of Persistent class
         # Custom Menu bar
-        self.main_menu = Menu(self.custom_menu_bar, font='Arial 16',
-                              tearoff=0)  # Tearoff has to be 0, in order the command to start being posted in position 0.
+        self.main_menu = Menu(
+            self.custom_menu_bar, font='Arial 16', tearoff=0
+        )
+        # Tearoff has to be 0, in order the command to start being posted in position 0.
         # self.custom_menu_bar.config(menu=self.main_menu)  # if this is enabled, the menu will appear in the top left of the window
 
         # Emerging Menu for main tk Window
@@ -1160,8 +1163,7 @@ class MultiColumnTree:
             for item in self.tree.get_children():
                 self.tree.delete(item)
         except Exception as err:
-            if debug:
-                print(f"fill_box_after_search> {err}")
+            logger.debug(f"fill_box_after_search> {err}")
         # Fill the treeview based on the typed entry
         try:
             if len(MultiColumnTree.search_tree) != 0:
@@ -1353,12 +1355,9 @@ def center(window, parent_window=None) -> None:
         logger.debug(f"Window: {window} centered according to the {parent_window} width and height")
 
 
-global input_coins
-persist = Persistent()
-persist.retrieve()  # Retrieve the saved coin list
-debug = True
-
 if __name__ == "__main__":
+    persist = Persistent()
+    persist.retrieve()  # Retrieve the saved coin list
     dir_path = os.path.dirname(os.path.realpath(__file__))
     print(dir_path)
     logger.debug(f"{dir_path=}")
