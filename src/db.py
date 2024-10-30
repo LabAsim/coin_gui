@@ -2,6 +2,7 @@ import logging
 import sqlite3
 import time
 from contextlib import ContextDecorator
+from typing import List, Any
 
 import pandas
 
@@ -166,8 +167,11 @@ class Db(ContextDecorator):
         )
         self.conn.commit()
 
-    def retrieve_coins_based_on_term(self, term: str) -> list[tuple, ...]:
-        """Retrieves and returns the available coins based on search term"""
+    def retrieve_coins_based_on_term(self, term: str) -> list[Any]:
+        """
+        Retrieves and returns the available coins based on search term
+        See: https://stackoverflow.com/a/59440990
+        """
         logger.debug(f"{term=}")
         cursor = self.conn.execute(
             '''
@@ -178,7 +182,7 @@ class Db(ContextDecorator):
         )
         self.conn.commit()
         rows = cursor.fetchall()
-        logger.info(f"{rows=}")
+
         return rows
 
 
