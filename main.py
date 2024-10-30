@@ -1,12 +1,10 @@
 # Version 6
 # Switch Autosave
-import sqlite3
 import argparse
 import csv
 import logging
 import os
 import sys
-import threading
 import time
 import tkinter
 import tkinter as tk
@@ -22,8 +20,8 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # , NavigationToolbar2Tk
 from pycoingecko import CoinGeckoAPI
 
-from db import Db
-from format import color_logging
+from src.db import Db
+from src.format import color_logging
 
 cg = CoinGeckoAPI()
 
@@ -1235,13 +1233,13 @@ class AskQuit(tkinter.Toplevel):
         self.grab_set()
         self.big_frame = ttk.Frame(self)
         self.big_frame.pack(expand=True, fill='both')
-        self.initUI()
+        self.init_ui()
         self.setActive()
         # center_to_screen(self)
         # center_according_to_root(self, self.parent)
         center(self, self.parent)
 
-    def initUI(self):
+    def init_ui(self):
         self.title("Quit")
         askquit_topframe = ttk.Frame(self.big_frame)
         askquit_topframe.pack(side='top', expand=True)
@@ -1249,7 +1247,7 @@ class AskQuit(tkinter.Toplevel):
         valueLabel.pack(side='right', expand=True)
         image = Image.open("multimedia/images/questionmark.png")
         image = image.resize(
-            (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), Image.ANTIALIAS
+            (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), Image.Resampling.LANCZOS
         )
         image = ImageTk.PhotoImage(image)
         image_label = ttk.Label(askquit_topframe, image=image)
