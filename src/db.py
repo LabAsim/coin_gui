@@ -171,9 +171,10 @@ class Db(ContextDecorator):
         logger.debug(f"{term=}")
         cursor = self.conn.execute(
             '''
-            SELECT id, symbol, name FROM available_coins WHERE id LIKE '%'||?||'%';
+            SELECT id, symbol, name FROM available_coins 
+            WHERE id LIKE '%'||?||'%' OR symbol LIKE '%'||?||'%' OR name LIKE '%'||?||'%';
             ''',
-            [term,]
+            [term, term, term]
         )
         self.conn.commit()
         rows = cursor.fetchall()
