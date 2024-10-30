@@ -62,8 +62,7 @@ class Coin:
     def delete_coin(coin=None):
         if coin:
             Coin.thecoins.remove(coin)
-            if Verbose:
-                print(f"Coin()>delete_coin>>> '{coin}' was successfully deleted from the list.")
+            logger.debug(f"Coin()>delete_coin>>> '{coin}' was successfully deleted from the list.")
 
     def __str__(self):
         return self.name
@@ -162,9 +161,9 @@ class Mainpage:
                 Coin(text)
                 self.controller.get_page_2(
                     'Secondpage')  # https://stackoverflow.com/questions/65181993/attributeerror-event-object-has-no-attribute-show-frame-in-tkinter
-                if Verbose:
-                    print('The new list: ', Coin.thecoins)
-                    print(f'The coin "{text}" was added successfully')
+
+                logger.debug('The new list: ', Coin.thecoins)
+                logger.debug(f'The coin "{text}" was added successfully')
         elif text in Coin.thecoins:
             return messagebox.showinfo('Message', f' Coin named "{text}" already exists.')
 
@@ -192,7 +191,7 @@ class Secondpage:
                         pair = (str(coin), str(prices))
                         Secondpage.retrieved_coins.append(pair)
             Secondpage.retrieved_coins = sorted(Secondpage.retrieved_coins)
-            if Verbose: print(f'The searched coins based on term: "{term}"  provided were successfully retrieved:'
+            logger.debug(f'The searched coins based on term: "{term}"  provided were successfully retrieved:'
                               f'Secondpage.retrieved_coins: {Secondpage.retrieved_coins}')
         else:
             if len(Secondpage.retrieved_coins) != 0:
@@ -201,7 +200,7 @@ class Secondpage:
                 pair = (str(coin), str(prices))
                 Secondpage.retrieved_coins.append(pair)
             Secondpage.retrieved_coins = sorted(Secondpage.retrieved_coins)
-            if Verbose: print(f'The coins were successfully retrieved:'
+            logger.debug(f'The coins were successfully retrieved:'
                               f'Secondpage.retrieved_coins: {Secondpage.retrieved_coins}')
 
     def __init__(self, note, name, controller):
@@ -324,9 +323,9 @@ class Secondpage:
                 self.fill_box()  # https://stackoverflow.com/questions/65181993/attributeerror-event-object-has-no-attribute-show-frame-in-tkinter
                 if autosave.get() is True:
                     self.controller.persistent.store()
-                if Verbose:
-                    print('Secondpage>insert_coin>The new list: ', Coin.thecoins)
-                    print(f'Secondpage>insert_coin>The coin "{temp_text}" was added successfully')
+
+                logger.debug('Secondpage>insert_coin>The new list: ', Coin.thecoins)
+                logger.debug(f'Secondpage>insert_coin>The coin "{temp_text}" was added successfully')
         elif temp_text in Coin.thecoins:
             return messagebox.showinfo('Message', f' Coin named "{temp_text}" already exists.')
 
@@ -382,8 +381,7 @@ class Secondpage:
         If term = None, it retrieves all the saved coins"""
         print(f'Secondpage>retrieve_coin_list called with "{term}"')
         if term:
-            if Verbose_dev:
-                print(f'Term : {term}')
+            logger.debug(f'Term : {term}')
             if len(self.search_tree) != 0:
                 Secondpage.search_tree.clear()
             # Search through the tuples
@@ -393,8 +391,7 @@ class Secondpage:
                         if term.lower() in item.lower():
                             if tuple_coin not in Secondpage.search_tree:
                                 Secondpage.search_tree.append(tuple_coin)
-            if Verbose:
-                print(f'The searched coins in Secondpage treeview '
+            logger.debug(f'The searched coins in Secondpage treeview '
                       f'based on term provided were successfully retrieved {Secondpage.search_tree}')
         # If term=''
         elif term == "":
@@ -402,8 +399,7 @@ class Secondpage:
                 Secondpage.search_tree.clear()
             for tuple_coin in Secondpage.values:
                 Secondpage.search_tree.append(tuple_coin)
-        if Verbose_dev:
-            print('Secondpage>retrieve_coin_list>Search list for the treeview:', Secondpage.search_tree)
+        logger.debug('Secondpage>retrieve_coin_list>Search list for the treeview:', Secondpage.search_tree)
 
     def fill_box_after_search(self):
         """Fills the listbox with coins from Secondpage.search_tree"""
@@ -417,32 +413,27 @@ class Secondpage:
         try:
             if len(Secondpage.search_tree) != 0:
                 for number, coin in enumerate(Secondpage.search_tree):
-                    if Verbose:
-                        pass
-                        # print(f'{coin}')
                     self.tree.insert("", tk.END, iid=str(number), values=coin)
-            if Verbose:
-                print(
-                    'Secondpage>fill_box_after_search(self): Search was successful: The results are now shown in Treeview')
+            logger.debug(
+                    'Secondpage>fill_box_after_search(self): Search was successful: '
+                    'The results are now shown in Treeview'
+            )
         except BaseException as err:
             raise err
             # print('Warning: Loading the searched Secondpage coin list failed!')
 
     def post_menu(self, event):
         self.context.post(event.x_root, event.y_root)
-        if Verbose:
-            print("Secondpage>post_menu>Emerging Menu from Secondage via right click is now visible")
+        logger.debug("Secondpage>post_menu>Emerging Menu from Secondage via right click is now visible")
 
     def modify(self):
         """Inserts the selected ID from the coin in the Coin class """
         #  Solution: https://stackoverflow.com/questions/30614279/tkinter-treeview-get-selected-item-values
         current = self.tree.focus()
-        if Verbose:
-            print(f'The selected row: {self.tree.item(current)}')
+        logger.debug(f'The selected row: {self.tree.item(current)}')
         # Pick the first value from the key 'values' from the dictionary self.tree.item(current)
         current_id_from_coin = self.tree.item(current)['values'][0]
-        if Verbose:
-            print(f'Selected coin: {current_id_from_coin}')
+        logger.debug(f'Selected coin: {current_id_from_coin}')
         # Add the coin to Coin class
         CoinWindow(controller=self.controller, operation='modify', coin=current_id_from_coin)
 
@@ -450,12 +441,10 @@ class Secondpage:
         """Inserts the selected ID from the coin in the Coin class """
         #  Solution: https://stackoverflow.com/questions/30614279/tkinter-treeview-get-selected-item-values
         current = self.tree.focus()
-        if Verbose:
-            print(f'The selected row: {self.tree.item(current)}')
+        logger.debug(f'The selected row: {self.tree.item(current)}')
         # Pick the first value from the key 'values' from the dictionary self.tree.item(current)
         current_id_from_coin = self.tree.item(current)['values'][0]
-        if Verbose:
-            print(f'Selected coin: {current_id_from_coin}')
+        logger.debug(f'Selected coin: {current_id_from_coin}')
         # Add the coin to Coin class
         CoinWindow(controller=self.controller, operation='delete', coin=current_id_from_coin)
         self.fill_box()  # Fill the Tree after deleting
@@ -490,8 +479,7 @@ class Secondpage:
             self.tree.column(column='Coin', width=max(coin_list_len) + 5, stretch=False)  # Don't stretch
             for number, value in enumerate(Secondpage.values):
                 self.tree.insert("", tk.END, iid=str(number), values=value)
-            if Verbose:
-                print(f'Secondpage>fill_box> Treeview was filled {Secondpage.values}')
+            logger.debug(f'Secondpage>fill_box> Treeview was filled {Secondpage.values}')
         except Exception as err:
             print(f'Secondpage>fill_box> Loading the coin list failed! {err}')
 
@@ -508,17 +496,18 @@ class Secondpage:
             print(f'Secondpage>fill_box_with_prices>  Error in deleting the Secondpage Tree {err}')
         try:
             if not retrieve:
-                if Verbose:
-                    print(f"Coin_prices.thecoins_prices: {Coin_prices.thecoins_prices} "
-                          f"{len(Coin_prices.thecoins_prices)}")
+                logger.debug(
+                    f"Coin_prices.thecoins_prices: {Coin_prices.thecoins_prices} "
+                          f"{len(Coin_prices.thecoins_prices)}"
+                  )
+
                 if len(Coin_prices.thecoins_prices) != 0:
                     for i, coin in enumerate(Coin_prices.thecoins_prices):
                         self.tree.insert("", tk.END, iid=str(i), values=[coin, Coin_prices.thecoins_prices[coin]])
                 else:
                     print(f"Secondpage>fill_box_with_prices> Coin_prices.thecoins_prices is empty")
             elif retrieve:
-                if Verbose:
-                    print(f"Secondpage>fill_box_with_prices> Secondpage.retrieved_coins: {Secondpage.retrieved_coins}")
+                logger.debug(f"Secondpage>fill_box_with_prices> Secondpage.retrieved_coins: {Secondpage.retrieved_coins}")
                 if len(Secondpage.retrieved_coins) != 0:
                     for i, tuple_coin in enumerate(Secondpage.retrieved_coins):
                         self.tree.insert("", tk.END, iid=str(i), values=[tuple_coin[0], tuple_coin[1]])
@@ -551,12 +540,10 @@ class Secondpage:
         self.fig_frame = ttk.Frame(self.figure_toplevel)
         self.fig_frame.pack(expand=True, fill='both')
 
-        if Verbose:
-            print(f'The selected row: {self.tree.item(current)}')
+        logger.debug(f'The selected row: {self.tree.item(current)}')
         # Pick the first value from the key 'values' from the dictionary self.tree.item(current)
         current_id_from_coin = self.tree.item(current)['values'][0]
-        if Verbose:
-            logger.debug(f'Selected coin: {current_id_from_coin}')
+        logger.debug(f'Selected coin: {current_id_from_coin}')
         data = cg.get_coin_market_chart_by_id(id=f'{current_id_from_coin}', vs_currency=f'{coin}', days=f'{days}')
         if coin == 'eur':  # Replace eur with the name euro for a proper representation of the coin
             coin = 'euro'
@@ -789,8 +776,7 @@ class Coin_prices:
             except:
                 Coin_prices.thecoins_prices[name] = 'Price not found'
                 print(f'Price for {name} was not found')
-            if Verbose:
-                print(name, '= ', price, '$')
+            logger.debug(name, '= ', price, '$')
 
 
 class CustomMenuBar(ttk.Frame):
@@ -970,8 +956,7 @@ class App:
         # Bind the keys to the proper list
         self.frames['Coin List'].search.bind('<KeyRelease>', self.frames['Coin List'].search_handler)
         Secondpage.fill_box(self.frames['Coin List'])
-        if Verbose:
-            print('Show coin list called')
+        logger.debug('Show coin list called')
 
     def submenu_gets_prices(self):
         """Gets the prices for the given coins in Coin.thecoins"""
@@ -1009,8 +994,7 @@ class App:
     def post_menu(self, event):
         """Posts the main menu at the exact position of mouse click"""
         self.context.post(event.x_root, event.y_root)
-        if Verbose:
-            print("Emerging Menu via right click is now visible")
+        logger.debug("Emerging Menu via right click is now visible")
 
     def get_page(self, page_class):
         """Return the instance of a page given its class name as a string"""
@@ -1041,8 +1025,7 @@ class App:
                 if str(page.__class__.__name__) == page_class:
                     page.frame.destroy()
                     App.retrieve_second(self)
-                    if Verbose:
-                        print('The new refreshed dictionary of classes is: ', page_dict)
+                    logger.debug('The new refreshed dictionary of classes is: ', page_dict)
         except:
             print(f"Warning: Error in loading {page_class}")
 
@@ -1146,7 +1129,7 @@ class MultiColumnTree:
         If term = None, it retrieves all the saved coins"""
         if term:
             start = time.time()
-            if Verbose_dev: print(f'Term : {term}')
+            logger.debug(f'Term : {term}')
             if len(MultiColumnTree.search_tree) != 0:
                 MultiColumnTree.search_tree.clear()
             # Search through the tuples
@@ -1160,7 +1143,7 @@ class MultiColumnTree:
             run_time = end - start
             print(f'Time: {run_time}')
             MultiColumnTree.search_tree = sorted(MultiColumnTree.search_tree)
-            if Verbose: print('The searched coins in TopLevel based on term provided were successfully retrieved')
+            logger.debug('The searched coins in TopLevel based on term provided were successfully retrieved')
         # If term=''
         else:
             if len(MultiColumnTree.search_tree) != 0:
@@ -1168,8 +1151,7 @@ class MultiColumnTree:
             for tuple_coin in MultiColumnTree.values:
                 MultiColumnTree.search_tree.append(tuple_coin)
             MultiColumnTree.search_tree = sorted(MultiColumnTree.search_tree)
-        if Verbose_dev:
-            print('Search list for the treeview:')
+        logger.debug('Search list for the treeview:')
 
     def fill_box_after_search(self):
         """Fills the listbox with coins from MultiColumnTree.search_tree"""
@@ -1185,26 +1167,22 @@ class MultiColumnTree:
             if len(MultiColumnTree.search_tree) != 0:
                 for number, coin in enumerate(MultiColumnTree.search_tree):
                     self.tree.insert("", tk.END, values=coin)
-            if Verbose:
-                print('Search was successful: The results are now shown in Treeview')
+            logger.debug('Search was successful: The results are now shown in Treeview')
         except Exception as err:
             print(f'Warning: Loading the searched coin list failed! {err}')
 
     def post_menu(self, event):
         self.context.post(event.x_root, event.y_root)
-        if Verbose:
-            print("Emerging Menu from class MultiColumnTree via right click is now visible")
+        logger.debug("Emerging Menu from class MultiColumnTree via right click is now visible")
 
     def insert(self):
         """ Inserts the selected ID from the coin in the Coin class """
         #  Solution: https://stackoverflow.com/questions/30614279/tkinter-treeview-get-selected-item-values
         current = self.tree.focus()
-        if Verbose:
-            print(f'MultiColumnTree>insert>The selected row: {self.tree.item(current)}')
+        logger.debug(f'MultiColumnTree>insert>The selected row: {self.tree.item(current)}')
         # Pick the first value from the key 'values' from the dictionary self.tree.item(current)
         current_id_from_coin = self.tree.item(current)['values'][0]
-        if Verbose:
-            print(f'MultiColumnTree>insert>Selected coin: {current_id_from_coin}')
+        logger.debug(f'MultiColumnTree>insert>Selected coin: {current_id_from_coin}')
         # Add the coin to Coin class
         if current_id_from_coin not in Coin.thecoins:
             if current_id_from_coin != '':  # To exclude the empty entry to be added
@@ -1376,8 +1354,6 @@ def center(window, parent_window=None) -> None:
 
 
 global input_coins
-Verbose = True
-Verbose_dev = True
 persist = Persistent()
 persist.retrieve()  # Retrieve the saved coin list
 debug = True
