@@ -166,6 +166,21 @@ class Db(ContextDecorator):
         )
         self.conn.commit()
 
+    def retrieve_coins_based_on_term(self, term: str) -> list[tuple, ...]:
+        """Retrieves and returns the available coins based on search term"""
+        logger.debug(f"{term=}")
+        cursor = self.conn.execute(
+            '''
+            SELECT id, symbol, name FROM available_coins WHERE id LIKE '%'||?||'%';
+            ''',
+            [term,]
+        )
+        self.conn.commit()
+        rows = cursor.fetchall()
+        logger.info(f"{rows=}")
+        return rows
+
+
     def __enter__(self):
         """https://stackoverflow.com/a/42623484"""
         logger.debug("Entering")
