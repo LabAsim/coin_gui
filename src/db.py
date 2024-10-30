@@ -129,6 +129,7 @@ class Db(ContextDecorator):
 
     def retrieve_available_coins(self) -> list:
         """Retrieves the saved available coins"""
+
         def dict_factory(cursor, row) -> dict:
             """See https://docs.python.org/3.10/library/sqlite3.html#how-to-create-and-use-row-factories"""
             fields = [column[0] for column in cursor.description]
@@ -142,7 +143,6 @@ class Db(ContextDecorator):
         )
         rows = cursor.fetchall()
         return rows
-
 
     def check_settings_time(self) -> float:
         """Checks if the settings time is today or a timestamp in the past"""
