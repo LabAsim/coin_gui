@@ -2,7 +2,6 @@ import logging
 import sqlite3
 import time
 from contextlib import ContextDecorator
-from datetime import datetime
 
 import pandas
 
@@ -74,13 +73,13 @@ class Db(ContextDecorator):
             ON CONFLICT(id) DO NOTHING;
         '''
         df['id'] = df["name"] + df["Timestamp"]
-        logging.debug(f"{df.to_records(index=False)=}")
+        # logging.debug(f"{df.to_records(index=False)=}")
         self.conn.executemany(query, df.to_records(index=False))
         self.conn.commit()
 
     def add_coins(self, coin: str) -> None:
         """Adds the coin name to the db"""
-        logger.debug(f"{coin=}")
+
         self.conn.execute(
             '''
             INSERT INTO saved_coins(name) values(?)
@@ -89,6 +88,7 @@ class Db(ContextDecorator):
             [coin]
         )
         self.conn.commit()
+        logger.debug(f"{coin=} added to db")
 
     def retrieve_coins(self) -> list:
         """Retrieves the names from saved coins"""
@@ -105,11 +105,6 @@ class Db(ContextDecorator):
     def save_single_available_coin(self, coin_tuple: tuple) -> None:
         """Saves available coins to the db"""
 
-        # for dicti_of_coin in available_coins_list:
-        #     _id = dicti_of_coin['id']
-        #     symbol = dicti_of_coin['symbol']
-        #     name = dicti_of_coin['name']
-        #     _tuple = (_id, symbol, name)
         self.conn.execute(
             '''
             INSERT INTO available_coins(id, symbol, name) values(?,?,?)
@@ -122,7 +117,7 @@ class Db(ContextDecorator):
     def save_all_available_coins(self, coins) -> None:
 
         coins = pandas.DataFrame(coins)
-        logger.debug(f"{coins=}")
+        # logger.debug(f"{coins=}")
         coins.to_sql(
             name="available_coins", con=self.conn, if_exists="replace", index=False
         )
@@ -154,7 +149,7 @@ class Db(ContextDecorator):
         )
         self.conn.commit()
         rows = cursor.fetchall()
-        logger.debug(f"{rows=}")
+        # logger.debug(f"{rows=}")
         for row in rows:
             if "available_coins_retrieved" in row:
                 return row[1]
