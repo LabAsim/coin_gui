@@ -6,7 +6,6 @@ import logging
 import os
 import sys
 import time
-import tkinter
 import tkinter as tk
 from datetime import datetime
 from tkinter import messagebox, simpledialog, Menu, ttk
@@ -1221,7 +1220,7 @@ class MultiColumnTree:
         self.controller.frames["Coin List"].fill_box()
 
 
-class AskQuit(tkinter.Toplevel):
+class AskQuit(tk.Toplevel):
     """
     A widget asking the user to quit or not.
     """
@@ -1388,7 +1387,7 @@ if __name__ == "__main__":
     print(dir_path)
     logger.debug(f"{dir_path=}")
     root = tk.Tk()  # First window
-    font = tkinter.font.Font(size=11)
+    font = tk.font.Font(size=11)
     #root.tk.call('source',
     #             os.path.join(dir_path, 'source/azure/azure.tcl'))  # https://github.com/rdbende/Azure-ttk-theme
     #root.tk.call("set_theme", "dark")
