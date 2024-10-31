@@ -185,7 +185,7 @@ class Secondpage:
         if term:
             if len(Secondpage.retrieved_coins) != 0:
                 Secondpage.retrieved_coins.clear()
-            for coin, prices in Coin_prices.thecoins_prices.items():
+            for coin, prices in CoinPrices.thecoins_prices.items():
                 if term:
                     if term.lower() in coin.lower():
                         pair = (str(coin), str(prices))
@@ -196,7 +196,7 @@ class Secondpage:
         else:
             if len(Secondpage.retrieved_coins) != 0:
                 Secondpage.retrieved_coins.clear()
-            for coin, prices in Coin_prices.thecoins_prices.items():
+            for coin, prices in CoinPrices.thecoins_prices.items():
                 pair = (str(coin), str(prices))
                 Secondpage.retrieved_coins.append(pair)
             Secondpage.retrieved_coins = sorted(Secondpage.retrieved_coins)
@@ -342,15 +342,15 @@ class Secondpage:
             # If the tree is totally empty, it will be filled with the coin list
             if len(self.tree.get_children()) == 0:
                 # If no prices are fetched
-                if len(Coin_prices.thecoins_prices) == 0:
-                    print("Secondpage>display_with_term(self)>> Coin_prices.thecoins_prices is empty,Tree was empty:"
+                if len(CoinPrices.thecoins_prices) == 0:
+                    print("Secondpage>display_with_term(self)>> CoinPrices.thecoins_prices is empty,Tree was empty:"
                           'calling self.retrieve_coin_list() & self.fill_box()')
                     self.retrieve_coin_list()
                     self.fill_box()
                 # Prices exist
                 else:
                     print(
-                        'Secondpage>display_with_term(self)   Tree is empty, Coin_prices.thecoins_prices is NOT empty:'
+                        'Secondpage>display_with_term(self)   Tree is empty, CoinPrices.thecoins_prices is NOT empty:'
                         'calling retrieve_coin_list_prices() & fill_box_with_prices(retrieve=False)')
                     self.retrieve_coin_list_prices()
                     self.fill_box_with_prices(retrieve=False)
@@ -488,7 +488,7 @@ class Secondpage:
         # Clear the treeview
         print(f'fill_box_with_prices(self, retrieve=False) was called with retrieve = {retrieve}')
         try:
-            if len(Coin_prices.thecoins_prices) != 0:  # Do not delete the items if there are not any coins with prices
+            if len(CoinPrices.thecoins_prices) != 0:  # Do not delete the items if there are not any coins with prices
                 for item in self.tree.get_children():
                     self.tree.delete(item)
                 print('Secondpage>fill_box_with_prices>  Tree was erased')
@@ -497,15 +497,15 @@ class Secondpage:
         try:
             if not retrieve:
                 logger.debug(
-                    f"Coin_prices.thecoins_prices: {Coin_prices.thecoins_prices} "
-                    f"{len(Coin_prices.thecoins_prices)}"
+                    f"CoinPrices.thecoins_prices: {CoinPrices.thecoins_prices} "
+                    f"{len(CoinPrices.thecoins_prices)}"
                 )
 
-                if len(Coin_prices.thecoins_prices) != 0:
-                    for i, coin in enumerate(Coin_prices.thecoins_prices):
-                        self.tree.insert("", tk.END, iid=str(i), values=[coin, Coin_prices.thecoins_prices[coin]])
+                if len(CoinPrices.thecoins_prices) != 0:
+                    for i, coin in enumerate(CoinPrices.thecoins_prices):
+                        self.tree.insert("", tk.END, iid=str(i), values=[coin, CoinPrices.thecoins_prices[coin]])
                 else:
-                    print(f"Secondpage>fill_box_with_prices> Coin_prices.thecoins_prices is empty")
+                    print(f"Secondpage>fill_box_with_prices> CoinPrices.thecoins_prices is empty")
             elif retrieve:
                 logger.debug(
                     f"Secondpage>fill_box_with_prices> Secondpage.retrieved_coins: {Secondpage.retrieved_coins}")
@@ -513,7 +513,7 @@ class Secondpage:
                     for i, tuple_coin in enumerate(Secondpage.retrieved_coins):
                         self.tree.insert("", tk.END, iid=str(i), values=[tuple_coin[0], tuple_coin[1]])
                 else:
-                    print(f"Secondpage>fill_box_with_prices> Coin_prices.thecoins_prices is empty")
+                    print(f"Secondpage>fill_box_with_prices> CoinPrices.thecoins_prices is empty")
         except Exception as err:
             print(f'Secondpage>fill_box_with_prices> '
                   f'Warning: Loading the searched coin list and their prices has failed! {err}')
@@ -746,21 +746,21 @@ class CoinWindow:
         self.controller.frames['Coin List'].display_with_term()
 
 
-class Coin_prices:
+class CoinPrices:
     """Retrieve prices from Coingecko"""
     thecoins_prices = {}
 
     def __init__(self, thecoins, controller):
         self.controller = controller
         self.thecoins: list = thecoins
-        Coin_prices.thecoins_prices.clear()  # Clears the dictionary to display properly the new coins.
-
+        CoinPrices.thecoins_prices.clear()  # Clears the dictionary to display properly the new coins.
+        coins_prices = None
         try:
             # Returns a dictionary: {'bitcoin': {'usd': 35365}, 'polkadot': {'usd': 18.19}}
             coins_prices = cg.get_price(ids=self.thecoins, vs_currencies='usd')
-            print(coins_prices)
+            logger.debug(coins_prices)
         except Exception as err:
-            print(f"Connecting to GoinGecko failed due to {err}")
+            logger.exception(f"Connecting to GoinGecko failed due to {err}")
             messagebox.showwarning('Warning', message='Connecting to GoinGecko failed')
 
         count = len(coins_prices)
@@ -773,11 +773,11 @@ class Coin_prices:
             try:  # To catch the exception to not having a price
                 price = list(coin_dict[x].values())
                 price = price[0]
-                Coin_prices.thecoins_prices[name] = price
-            except:
-                Coin_prices.thecoins_prices[name] = 'Price not found'
+                CoinPrices.thecoins_prices[name] = price
+            except Exception:
+                CoinPrices.thecoins_prices[name] = 'Price not found'
                 print(f'Price for {name} was not found')
-            logger.debug(name, '= ', price, '$')
+            logger.debug(f"{name} = {price}$")
 
 
 class CustomMenuBar(ttk.Frame):
@@ -963,7 +963,7 @@ class App:
 
     def submenu_gets_prices(self):
         """Gets the prices for the given coins in Coin.thecoins"""
-        Coin_prices(thecoins=Coin.thecoins, controller=self)
+        CoinPrices(thecoins=Coin.thecoins, controller=self)
         # Overwrite bind of keys to the proper list, the one with the prices
         # self.frames['Coin List'].search.bind('<KeyRelease>', self.frames['Coin List'].search_handler_only_saved)
         Secondpage.fill_box_with_prices(self.frames['Coin List'], retrieve=False)
