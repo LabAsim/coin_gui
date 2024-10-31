@@ -91,6 +91,18 @@ class Db(ContextDecorator):
         self.conn.commit()
         logger.debug(f"{coin=} added to db")
 
+    def delete_coin(self, coin: str) -> None:
+        """Deletes the coin from the db"""
+
+        self.conn.execute(
+            '''
+            DELETE from saved_coins WHERE name=?;
+            ''',
+            [coin,]
+        )
+        self.conn.commit()
+        logger.debug(f"{coin=} deleted from db")
+
     def retrieve_coins(self) -> list:
         """Retrieves the names from saved coins"""
         cursor = self.conn.execute(
