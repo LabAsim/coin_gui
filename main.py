@@ -838,7 +838,6 @@ class App:
     y = 600
     # A solution https://stackoverflow.com/questions/7546050/switch-between-two-frames-in-tkinter/7557028#7557028
     available_coin_list = {}
-    global page_dict
     page_dict = {}  # https://stackoverflow.com/questions/32212408/how-to-get-variable-data-from-a-class
 
     def __init__(self, root):
@@ -859,7 +858,7 @@ class App:
         self.note.pack(expand=True, fill='both', padx=1, pady=1)
         self.secondpage = App.retrieve_second(self)
         # self.maipage = App.retrieve_main(self)
-        self.frames = page_dict
+        self.frames = App.page_dict
         print('The initial pages are: ', self.frames)
         self.persistent = Persistent()  # to call an instance of Persistent class
         # Custom Menu bar
@@ -1009,16 +1008,16 @@ class App:
     def retrieve_main(self):
         """Retrieve Mainpage"""
         for name in ['Mainpage']:
-            if name not in list(page_dict.keys()):
-                page_dict[name] = Mainpage(self.note, name, controller=self)
+            if name not in list(App.page_dict.keys()):
+                App.page_dict[name] = Mainpage(self.note, name, controller=self)
             else:
                 self.frames['Mainpage'].frame.destroy()
-                page_dict[name] = Mainpage(self.note, name, controller=self)
+                App.page_dict[name] = Mainpage(self.note, name, controller=self)
 
     def retrieve_second(self):
         """Retrieve second page"""
         for name in ['Coin List']:
-            page_dict[name] = Secondpage(self.note, name, controller=self)
+            App.page_dict[name] = Secondpage(self.note, name, controller=self)
             # return Secondpage(self.note, name)
 
     def get_page_2(self, page_class):
@@ -1028,7 +1027,7 @@ class App:
                 if str(page.__class__.__name__) == page_class:
                     page.frame.destroy()
                     App.retrieve_second(self)
-                    logger.debug('The new refreshed dictionary of classes is: ', page_dict)
+                    logger.debug('The new refreshed dictionary of classes is: ', App.page_dict)
         except:
             print(f"Warning: Error in loading {page_class}")
 
