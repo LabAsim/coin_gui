@@ -84,7 +84,7 @@ class Persistent:
                 Coin(name=coin[0])
 
     @staticmethod
-    def store():
+    def store_to_db():
         """Stores the name of the coins to the db"""
         with Db() as database:
             for coin in Coin.thecoins:
@@ -322,7 +322,7 @@ class Secondpage:
                 Coin(temp_text)
                 self.fill_box()  # https://stackoverflow.com/questions/65181993/attributeerror-event-object-has-no-attribute-show-frame-in-tkinter
                 if autosave.get() is True:
-                    self.controller.persistent.store()
+                    self.controller.persistent.store_to_db()
 
                 logger.debug('Secondpage>insert_coin>The new list: ', Coin.thecoins)
                 logger.debug(f'Secondpage>insert_coin>The coin "{temp_text}" was added successfully')
@@ -721,7 +721,7 @@ class CoinWindow:
             self.window.destroy()
             Coin.delete_coin(self.name)
             if autosave.get() is True:
-                self.controller.persistent.store()
+                self.controller.persistent.store_to_db()
                 print(f'CoinWindow()>to_act()>Coin is autosaved!')
         else:
             new_name = self.name_entry.get().strip()
@@ -732,7 +732,7 @@ class CoinWindow:
                 if new_name:
                     Coin(new_name)
                     if autosave.get() is True:
-                        self.controller.persistent.store()
+                        self.controller.persistent.store_to_db()
                         print(f'CoinWindow()>to_act()>Coin is autosaved!')
             self.window.destroy()
         print('CoinWindow()>to_act()>Window destroyed')
@@ -891,7 +891,7 @@ class App:
         # add the Help menu to the Custom menubar
         self.custom_menu_bar.add_menu(title='Help', menu=self.help_menu, font='Arial 13')
 
-    def save_retrieve_available_coins(self):
+    def save_retrieve_available_coins(self) -> list:
         """Checks if the saved info is old and replaces it with a new list of coins"""
         with Db() as database:
             available_coins_retrieved_settings_time = database.check_settings_time()
@@ -920,8 +920,8 @@ class App:
         tree = AvailableCoinsMultiColumnTree(controller=self)
 
     def main_menu_save(self):
-        """Calls the Persistent class and saves the current list to the .csv file"""
-        Persistent.store()
+        """Calls the Persistent class and saves the current list to the db"""
+        Persistent.store_to_db()
 
     def submenu_show_coinlist(self):
         """Just shows the coinlist in the secondpage of the notebook(aka Secondpage class)"""
@@ -946,7 +946,7 @@ class App:
         self.persistent.read_from_file()
         Secondpage.fill_box(self.frames['Coin List'])
         if autosave:
-            self.persistent.store()
+            self.persistent.store_to_db()
 
     def exit_the_program(self):
         """Exits the program"""
@@ -1162,11 +1162,11 @@ class AvailableCoinsMultiColumnTree:
                 Coin(current_id_from_coin)
                 if autosave.get() is True:
                     print(f"AvailableCoinsMultiColumnTree>insert> Autosaving {current_id_from_coin} to the file")
-                    self.controller.persistent.store()
+                    self.controller.persistent.store_to_db()
         elif current_id_from_coin in Coin.thecoins:
             print(f"{current_id_from_coin} already exists in the list")
             # TODO: Create a class similar to AskQuit, named WarningMessage, to display a message to user
-        self.controller.persistent.store()
+        self.controller.persistent.store_to_db()
         # Call the Secondpage.fill_box in order for the coin to be shown
         self.controller.frames["Coin List"].fill_box()
 
