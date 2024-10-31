@@ -890,36 +890,6 @@ class App:
         self.help_menu.add_command(label='About...')
         # add the Help menu to the Custom menubar
         self.custom_menu_bar.add_menu(title='Help', menu=self.help_menu, font='Arial 13')
-        '''
-        # Main menu
-        self.main_menu = Menu(self.root, font='Arial 16',
-                              tearoff=0)  # Tearoff has to be 0, in order the command to start being posted in position 0.
-        self.root.config(menu=self.main_menu)  # if this is enabled, the menu will appear in the top left of the window
-        # Emerging Menu for main tk Window
-        self.context = Menu(self.main_menu, font='Arial 16',
-                            tearoff=0)
-        self.context.add_command(label='Show available coins', font='Arial 10', command=self.show_available_coins)
-        self.context.add_command(label='Show coin list', font='Arial 10', command=self.submenu_show_coinlist)
-        self.context.add_command(label='Get & show coin prices ', font='Arial 10', command=self.submenu_gets_prices)
-        self.context.add_command(label='Show saved coin prices ', font='Arial 10',
-                                 command=self.submenu_show_saved_prices)
-        self.context.add_command(label='Save', font='Arial 10',
-                                 command=self.main_menu_save)  # Save the list to csv file
-        self.context.add_separator()
-        self.context.add_command(label='Exit', font='Arial 10', command=self.exit_the_program)
-        # Add the cascade here. The submenu has to be built first and then be added to the main menu
-        self.main_menu.add_cascade(label='Menu', menu=self.context)
-        # create the Help menu
-        help_menu = Menu(self.main_menu, tearoff=0)
-        help_menu.add_command(label='Change theme', command=self.change_theme)
-        help_menu.add_command(label='Welcome')
-        help_menu.add_command(label='About...')
-        # add the Help menu to the menubar
-        self.main_menu.add_cascade(
-            label="Help",
-            menu=help_menu,
-            underline=0
-        )'''
 
     def save_retrieve_available_coins(self):
         """Checks if the saved info is old and replaces it with a new list of coins"""
