@@ -105,6 +105,13 @@ class Persistent:
         except Exception:
             logger.exception(msg="Error in reading from file")
 
+    @staticmethod
+    def delete_coin_from_db(coin:  str) -> None:
+        """Deletes the coin from the db"""
+        with Db() as database:
+            database.delete_coin(coin=coin)
+            logger.debug(f"Coins saved")
+
 
 class Mainpage:
     """ Main page"""
@@ -391,15 +398,19 @@ class Secondpage:
                         if term.lower() in item.lower():
                             if tuple_coin not in Secondpage.search_tree:
                                 Secondpage.search_tree.append(tuple_coin)
-            logger.debug(f'The searched coins in Secondpage treeview '
-                         f'based on term provided were successfully retrieved {Secondpage.search_tree}')
+            logger.debug(
+                f'The searched coins in Secondpage treeview '
+                f'based on term provided were successfully retrieved {Secondpage.search_tree}'
+            )
         # If term=''
         elif term == "":
             if len(Secondpage.search_tree) != 0:
                 Secondpage.search_tree.clear()
             for tuple_coin in Secondpage.values:
                 Secondpage.search_tree.append(tuple_coin)
-        logger.debug('Secondpage>retrieve_coin_list>Search list for the treeview:', Secondpage.search_tree)
+        logger.debug(
+            f'Secondpage>retrieve_coin_list>Search list for the treeview:{Secondpage.search_tree}'
+        )
 
     def fill_box_after_search(self):
         """Fills the listbox with coins from Secondpage.search_tree"""
@@ -691,8 +702,8 @@ class CoinWindow:
         self.f0 = ttk.Frame(self.window)
         if self.operation == 'delete':
             msg = 'Delete coin'
-        elif self.operation == 'modify':
-            msg = 'Modify coin'
+        # elif self.operation == 'modify':
+        #     msg = 'Modify coin'
         elif self.operation == 'insert':
             msg = 'Insert new coin'
         else:
@@ -720,6 +731,7 @@ class CoinWindow:
         if self.operation == 'delete':
             self.window.destroy()
             Coin.delete_coin(self.name)
+            Persistent.delete_coin_from_db(coin=self.name)
             if autosave.get() is True:
                 self.controller.persistent.store_to_db()
                 print(f'CoinWindow()>to_act()>Coin is autosaved!')
@@ -727,7 +739,9 @@ class CoinWindow:
             new_name = self.name_entry.get().strip()
             # If the given coin already exists, we do nothing. Otherwise, we insert the coin name.
             if new_name in Coin.thecoins:
-                tk.messagebox.showwarning(title='Warning', message=f'The coin {new_name} already exists.')
+                tk.messagebox.showwarning(
+                    title='Warning', message=f'The coin {new_name} already exists.'
+                )
             else:
                 if new_name:
                     Coin(new_name)
@@ -1110,9 +1124,9 @@ class AvailableCoinsMultiColumnTree:
                 listed_coins = database.retrieve_coins_based_on_term(term=term)
                 for tuple_coin in listed_coins:
                     # for item in tuple_coin:
-                        # if term.lower() in item.lower():
-                        #     if tuple_coin not in AvailableCoinsMultiColumnTree.search_tree:
-                                AvailableCoinsMultiColumnTree.search_tree.append(tuple_coin)
+                    # if term.lower() in item.lower():
+                    #     if tuple_coin not in AvailableCoinsMultiColumnTree.search_tree:
+                    AvailableCoinsMultiColumnTree.search_tree.append(tuple_coin)
             end = time.time()
             run_time = end - start
             print(f'Time: {run_time}')
