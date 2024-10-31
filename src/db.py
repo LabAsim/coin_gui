@@ -95,7 +95,7 @@ class Db(ContextDecorator):
         """Retrieves the names from saved coins"""
         cursor = self.conn.execute(
             '''
-            SELECT name FROM saved_coins
+            SELECT name FROM saved_coins;
             '''
         )
         self.conn.commit()
@@ -134,7 +134,7 @@ class Db(ContextDecorator):
         self.conn.row_factory = dict_factory
         cursor = self.conn.execute(
             '''
-            SELECT * FROM available_coins
+            SELECT * FROM available_coins;
             '''
         )
         rows = cursor.fetchall()
@@ -145,7 +145,7 @@ class Db(ContextDecorator):
 
         cursor = self.conn.execute(
             '''
-            SELECT * FROM settings
+            SELECT * FROM settings;
             '''
         )
         self.conn.commit()
@@ -184,7 +184,6 @@ class Db(ContextDecorator):
         rows = cursor.fetchall()
 
         return rows
-
 
     def __enter__(self):
         """https://stackoverflow.com/a/42623484"""
