@@ -1,6 +1,5 @@
 # Version 6
 # Switch Autosave
-import argparse
 import csv
 import logging
 import os
@@ -21,6 +20,7 @@ from pycoingecko import CoinGeckoAPI
 
 from src.db import Db
 from src.format import color_logging
+from src.helper_funcs import sortby, str2bool, center
 
 cg = CoinGeckoAPI()
 
@@ -982,7 +982,7 @@ class App:
     def exit_the_program(self):
         """Exits the program"""
         # self.root.destroy()
-        print(f'App>exit_the_program()')
+        logger.info(f'App>exit_the_program()')
         sys.exit()
 
     def change_theme(self):
@@ -1265,96 +1265,6 @@ class AskQuit(tk.Toplevel):
         self.big_frame.focus_force()
         self.big_frame.grab_set()
         # self.parent.grab_release()
-
-
-def sort_(data) -> float | int:
-    """Convert strings to float and 'Price not found' to 0"""
-    try:
-        return float(data[0])
-    except ValueError:
-        return 0  # If price not found, the price is set to 0 in order to be sorted alongside the other coins
-
-
-def sortby(tree, col, descending) -> None:
-    """sort tree contents when a column header is clicked on
-    https://www.daniweb.com/programming/software-development/threads/350266/creating-table-in-python#post1487238"""
-    # grab values to sort
-    data = [(tree.set(child, col), child)
-            for child in tree.get_children('')]
-    # if the data to be sorted is numeric change to float
-    # data =  change_numeric(data)
-    # now sort the data in place
-    if col.title() == 'Coin':
-        data.sort(reverse=descending)
-    elif col.title() == 'Price':
-        data.sort(key=sort_, reverse=descending)
-    for ix, item in enumerate(data):
-        if isinstance(item[1], int):
-            tree.move(item, "", ix)
-        else:
-            tree.move(item[1], '', ix)
-    # switch the heading, so it will sort in the opposite direction
-    tree.heading(col, command=lambda colu=col: sortby(tree, col,
-                                                      int(not descending)))
-
-
-def str2bool(v: bool | int | str) -> bool | None:
-    """
-    Convert a string to a boolean argument
-    https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
-    """
-    if isinstance(v, bool):
-        return v
-    elif isinstance(v, int):
-        if v == 1:
-            return True
-        elif v == 0:
-            return False
-    elif v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-def close_tkinter() -> None:
-    if messagebox.askokcancel(title="Quit", message="Do you want to quit?"):
-        root.destroy()
-        logger.warning('close_tkinter(): Tkinter window is exiting')
-        sys.exit()
-
-
-def center(window, parent_window=None) -> None:
-    """
-    https://stackoverflow.com/questions/3352918/how-to-center-a-window-on-the-screen-in-tkinter
-    :param window: The window to be centered
-    :param parent_window: A toplevel or root
-    """
-    if not parent_window:
-        window.update_idletasks()
-        width = window.winfo_width()
-        frm_width = window.winfo_rootx() - window.winfo_x()
-        win_width = width + 2 * frm_width
-        height = window.winfo_height()
-        titlebar_height = window.winfo_rooty() - window.winfo_y()
-        win_height = height + titlebar_height + frm_width
-        x = window.winfo_screenwidth() // 2 - win_width // 2
-        y = window.winfo_screenheight() // 2 - win_height // 2
-        window.geometry('+{}+{}'.format(x, y))
-        window.deiconify()
-        logger.debug(f"Window: {window} centered according to the screen width and height")
-    else:
-        window.update_idletasks()
-        width_parent = parent_window.winfo_width()
-        height_parent = parent_window.winfo_height()
-        parent_x = parent_window.winfo_x()
-        parent_y = parent_window.winfo_y()
-        size = tuple(int(_) for _ in window.geometry().split('+')[0].split('x'))
-        x_dif = width_parent // 2 - size[0] // 2
-        y_dif = height_parent // 2 - size[1] // 2
-        window.geometry('+{}+{}'.format(parent_x + x_dif, parent_y + y_dif))
-        logger.debug(f"Window: {window} centered according to the {parent_window} width and height")
 
 
 if __name__ == "__main__":
