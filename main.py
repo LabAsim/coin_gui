@@ -947,8 +947,8 @@ class App:
             symbol = dicti_of_coin["symbol"]
             name = dicti_of_coin["name"]
             coin_tuple = (coin_id, symbol, name)
-            MultiColumnTree.values.append(coin_tuple)
-        tree = MultiColumnTree(controller=self)
+            AvailableCoinsMultiColumnTree.values.append(coin_tuple)
+        tree = AvailableCoinsMultiColumnTree(controller=self)
 
     def main_menu_save(self):
         """Calls the Persistent class and saves the current list to the .csv file"""
@@ -1063,7 +1063,7 @@ class App:
         print(f'Autosave set: type:{type(autosave)} value:{autosave.get()}')
 
 
-class MultiColumnTree:
+class AvailableCoinsMultiColumnTree:
     """Creates a toplevel with the available coins"""
     id_list = []
     symbol_list = []
@@ -1102,11 +1102,11 @@ class MultiColumnTree:
         center(self.toplevel_coins, root)
 
     def setup_widgets(self):
-        self.tree = ttk.Treeview(self.frame, columns=MultiColumnTree.header, show='headings')
+        self.tree = ttk.Treeview(self.frame, columns=AvailableCoinsMultiColumnTree.header, show='headings')
         # Fill the tree
-        for head in MultiColumnTree.header:
+        for head in AvailableCoinsMultiColumnTree.header:
             self.tree.heading(column=head, text=f'{head}')
-        for value in MultiColumnTree.values:
+        for value in AvailableCoinsMultiColumnTree.values:
             self.tree.insert("", tk.END, values=value)
         vsb = ttk.Scrollbar(self.tree, orient="vertical", command=self.tree.yview)
         hsb = ttk.Scrollbar(self.tree, orient="horizontal", command=self.tree.xview)
@@ -1134,32 +1134,32 @@ class MultiColumnTree:
         if term:
             start = time.time()
             logger.debug(f'Term : {term}')
-            if len(MultiColumnTree.search_tree) != 0:
-                MultiColumnTree.search_tree.clear()
+            if len(AvailableCoinsMultiColumnTree.search_tree) != 0:
+                AvailableCoinsMultiColumnTree.search_tree.clear()
             # Retrieve the tuples from the db
             with Db() as database:
                 listed_coins = database.retrieve_coins_based_on_term(term=term)
                 for tuple_coin in listed_coins:
                     # for item in tuple_coin:
                         # if term.lower() in item.lower():
-                        #     if tuple_coin not in MultiColumnTree.search_tree:
-                                MultiColumnTree.search_tree.append(tuple_coin)
+                        #     if tuple_coin not in AvailableCoinsMultiColumnTree.search_tree:
+                                AvailableCoinsMultiColumnTree.search_tree.append(tuple_coin)
             end = time.time()
             run_time = end - start
             print(f'Time: {run_time}')
-            MultiColumnTree.search_tree = sorted(MultiColumnTree.search_tree)
+            AvailableCoinsMultiColumnTree.search_tree = sorted(AvailableCoinsMultiColumnTree.search_tree)
             logger.debug('The searched coins in TopLevel based on term provided were successfully retrieved')
         # If term=''
         else:
-            if len(MultiColumnTree.search_tree) != 0:
-                MultiColumnTree.search_tree.clear()
-            for tuple_coin in MultiColumnTree.values:
-                MultiColumnTree.search_tree.append(tuple_coin)
-            MultiColumnTree.search_tree = sorted(MultiColumnTree.search_tree)
+            if len(AvailableCoinsMultiColumnTree.search_tree) != 0:
+                AvailableCoinsMultiColumnTree.search_tree.clear()
+            for tuple_coin in AvailableCoinsMultiColumnTree.values:
+                AvailableCoinsMultiColumnTree.search_tree.append(tuple_coin)
+            AvailableCoinsMultiColumnTree.search_tree = sorted(AvailableCoinsMultiColumnTree.search_tree)
         logger.debug('Search list for the treeview:')
 
     def fill_box_after_search(self):
-        """Fills the listbox with coins from MultiColumnTree.search_tree"""
+        """Fills the listbox with coins from AvailableCoinsMultiColumnTree.search_tree"""
         # Clear the treeview
         try:
             for item in self.tree.get_children():
@@ -1168,8 +1168,8 @@ class MultiColumnTree:
             logger.debug(f"fill_box_after_search> {err}")
         # Fill the treeview based on the typed entry
         try:
-            if len(MultiColumnTree.search_tree) != 0:
-                for number, coin in enumerate(MultiColumnTree.search_tree):
+            if len(AvailableCoinsMultiColumnTree.search_tree) != 0:
+                for number, coin in enumerate(AvailableCoinsMultiColumnTree.search_tree):
                     self.tree.insert("", tk.END, values=coin)
             logger.debug('Search was successful: The results are now shown in Treeview')
         except Exception as err:
@@ -1177,22 +1177,22 @@ class MultiColumnTree:
 
     def post_menu(self, event):
         self.context.post(event.x_root, event.y_root)
-        logger.debug("Emerging Menu from class MultiColumnTree via right click is now visible")
+        logger.debug("Emerging Menu from class AvailableCoinsMultiColumnTree via right click is now visible")
 
     def insert(self):
         """ Inserts the selected ID from the coin in the Coin class """
         #  Solution: https://stackoverflow.com/questions/30614279/tkinter-treeview-get-selected-item-values
         current = self.tree.focus()
-        logger.debug(f'MultiColumnTree>insert>The selected row: {self.tree.item(current)}')
+        logger.debug(f'AvailableCoinsMultiColumnTree>insert>The selected row: {self.tree.item(current)}')
         # Pick the first value from the key 'values' from the dictionary self.tree.item(current)
         current_id_from_coin = self.tree.item(current)['values'][0]
-        logger.debug(f'MultiColumnTree>insert>Selected coin: {current_id_from_coin}')
+        logger.debug(f'AvailableCoinsMultiColumnTree>insert>Selected coin: {current_id_from_coin}')
         # Add the coin to Coin class
         if current_id_from_coin not in Coin.thecoins:
             if current_id_from_coin != '':  # To exclude the empty entry to be added
                 Coin(current_id_from_coin)
                 if autosave.get() is True:
-                    print(f"MultiColumnTree>insert> Autosaving {current_id_from_coin} to the file")
+                    print(f"AvailableCoinsMultiColumnTree>insert> Autosaving {current_id_from_coin} to the file")
                     self.controller.persistent.store()
         elif current_id_from_coin in Coin.thecoins:
             print(f"{current_id_from_coin} already exists in the list")
