@@ -556,7 +556,11 @@ class Secondpage:
         # Pick the first value from the key 'values' from the dictionary self.tree.item(current)
         current_id_from_coin = self.tree.item(current)['values'][0]
         logger.debug(f'Selected coin: {current_id_from_coin}')
-        data = cg.get_coin_market_chart_by_id(id=f'{current_id_from_coin}', vs_currency=f'{coin}', days=f'{days}')
+        try:
+            data = cg.get_coin_market_chart_by_id(id=f'{current_id_from_coin}', vs_currency=f'{coin}', days=f'{days}')
+        except ValueError:
+            logger.exception(msg="Error fetching data from Coingecko")
+            return
         if coin == 'eur':  # Replace eur with the name euro for a proper representation of the coin
             coin = 'euro'
         # Coingecko returns the data to UNIX timestamp in milliseconds
