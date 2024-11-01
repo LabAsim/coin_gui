@@ -1,5 +1,7 @@
 import argparse
 import logging
+import os
+import pathlib
 import sys
 import tkinter as tk
 from tkinter import messagebox
@@ -95,3 +97,12 @@ def center(window, parent_window=None) -> None:
         y_dif = height_parent // 2 - size[1] // 2
         window.geometry('+{}+{}'.format(parent_x + x_dif, parent_y + y_dif))
         logger.debug(f"Window: {window} centered according to the {parent_window} width and height")
+
+
+def file_exists(dir_path: str | os.PathLike, name: str) -> bool:
+    """Returns true if the path exists"""
+    path_to_name = pathlib.Path(os.path.join(dir_path, name))
+    if path_to_name.exists():
+        return True
+    else:
+        return False
