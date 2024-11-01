@@ -37,7 +37,8 @@ class Db(ContextDecorator):
                 timestamp timestamp with time zone,
                 price BIGFLOAT NOT NULL,
                 marketcap  FLOAT,
-                total_volume FLOAT
+                total_volume FLOAT,
+                currency TEXT
             );    
             """
         )
@@ -75,15 +76,16 @@ class Db(ContextDecorator):
         )
         self.conn.commit()
 
-    def insert_coin_values(self, df: pandas.DataFrame, coin: str) -> None:
+    def insert_coin_values(self, df: pandas.DataFrame, currency: str) -> None:
         """
         Inserts the prices etc. to the sqlite db.
         """
         query = f'''
-            INSERT OR REPLACE INTO coins(name,timestamp, price, total_volume, marketcap,id) values (?,?,?,?,?,?)
+            INSERT OR REPLACE INTO coins(name,timestamp, price, total_volume, marketcap,id, currency) values (?,?,?,?,?,?,?)
             ON CONFLICT(id) DO NOTHING;
         '''
-        df['id'] = df["name"] + df["Timestamp"]
+        df['id'] = df["name"] + "_" + df["Timestamp"]  + "_" + currency
+        df["currency"] = currency
         # logging.debug(f"{df.to_records(index=False)=}")
         self.conn.executemany(query, df.to_records(index=False))
         self.conn.commit()
