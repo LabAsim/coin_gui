@@ -106,7 +106,7 @@ class Persistent:
             logger.exception(msg="Error in reading from file")
 
     @staticmethod
-    def delete_coin_from_db(coin:  str) -> None:
+    def delete_coin_from_db(coin: str) -> None:
         """Deletes the coin from the db"""
         with Db() as database:
             database.delete_coin(coin=coin)
@@ -273,7 +273,7 @@ class Secondpage:
         self.contextsubmenu_usd.add_command(label='Previous 1 day', command=lambda: self.get_charts(days=1))
         self.contextsubmenu_usd.add_command(label='Previous 7 days', command=lambda: self.get_charts(days=7))
         self.contextsubmenu_usd.add_command(label='Previous 90 days', command=lambda: self.get_charts(days=90))
-        self.contextsubmenu_usd.add_command(label='Previous 360 days', command=lambda: self.get_charts(days=360))
+        self.contextsubmenu_usd.add_command(label='Previous 365 days', command=lambda: self.get_charts(days=365))
         self.contextsubmenu_usd.add_command(label='Since inception', command=lambda: self.get_charts(days='max'))
         self.contextsubmenu_usd.add_command(label='Custom days', command=lambda: self.custom_days(coin='usd'))
         self.contextsubmenu_eur.add_command(label='Previous 1 day', command=lambda: self.get_charts(days=1, coin='eur'))
@@ -281,8 +281,8 @@ class Secondpage:
                                             command=lambda: self.get_charts(days=7, coin='eur'))
         self.contextsubmenu_eur.add_command(label='Previous 90 days',
                                             command=lambda: self.get_charts(days=90, coin='eur'))
-        self.contextsubmenu_eur.add_command(label='Previous 360 days',
-                                            command=lambda: self.get_charts(days=360, coin='eur'))
+        self.contextsubmenu_eur.add_command(label='Previous 365 days',
+                                            command=lambda: self.get_charts(days=365, coin='eur'))
         self.contextsubmenu_eur.add_command(label='Since inception',
                                             command=lambda: self.get_charts(days='max', coin='eur'))
         self.contextsubmenu_eur.add_command(label='Custom days', command=lambda: self.custom_days(coin='eur'))
@@ -529,7 +529,7 @@ class Secondpage:
             print(f'Secondpage>fill_box_with_prices> '
                   f'Warning: Loading the searched coin list and their prices has failed! {err}')
 
-    def get_charts(self, coin='usd', days=str(90)):
+    def get_charts(self, coin='usd', days: str | int = str(90)):
         """Draws a plot containing price, marketcap and total volumes for the previous 90 days.
            if days>90, coingecko sends data in days. If <90 data intervals are smaller."""
         # Destroy the toplevel, so as not to be overlapped by a previous one.
@@ -601,7 +601,7 @@ class Secondpage:
         df_total = df_total.merge(df2, how="left", on="Timestamp")
         df_total = df_total.merge(df3, how="left", on="Timestamp")
         # logger.debug(f"{df_total=}")
-        database.insert_coin_values(df=df_total, coin=current_id_from_coin)
+        database.insert_coin_values(df=df_total, currency=coin)
 
         self.figure = plt.figure(1, figsize=(15, 15), dpi=100)
         ax1 = self.figure.add_subplot(211)
@@ -630,7 +630,7 @@ class Secondpage:
         ax2.set_ylabel(f'Per million {coin.capitalize()}')
         if days == 'max':
             ax2.set_xticks(df["Timestamp"][::180])  # Every semester
-        elif int(days) == 360:
+        elif int(days) == 365:
             ax2.set_xticks(df["Timestamp"][::30])  # Every 30 days
         elif 2 > int(days):
             ax2.set_xticks(df["Timestamp"][::12])  # Every 60 minutes (5min interval)
