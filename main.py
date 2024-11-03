@@ -13,14 +13,13 @@ from tkinter.filedialog import askopenfile
 import colorama
 import pandas as pd
 import tktooltip  # https://github.com/gnikit/tkinter-tooltip
-from PIL import Image, ImageTk
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # , NavigationToolbar2Tk
 from pycoingecko import CoinGeckoAPI
 
 from src.db import Db
 from src.format import color_logging
-from src.helper_classes import CustomMenuBar
+from src.helper_classes import CustomMenuBar, AskQuit
 from src.helper_funcs import sortby, str2bool, center
 
 cg = CoinGeckoAPI()
@@ -1127,69 +1126,6 @@ class AvailableCoinsMultiColumnTree:
         self.controller.frames["Coin List"].fill_box()
 
 
-class AskQuit(tk.Toplevel):
-    """
-    A widget asking the user to quit or not.
-    """
-
-    def __init__(self, parent):
-        super().__init__()
-        # self.target = target
-        self.parent = parent
-        self.grab_set()
-        self.big_frame = ttk.Frame(self)
-        self.big_frame.pack(expand=True, fill='both')
-        self.init_ui()
-        self.setActive()
-        # center_to_screen(self)
-        # center_according_to_root(self, self.parent)
-        center(self, self.parent)
-
-    def init_ui(self):
-        self.title("Quit")
-        askquit_topframe = ttk.Frame(self.big_frame)
-        askquit_topframe.pack(side='top', expand=True)
-        valueLabel = ttk.Label(askquit_topframe, text="Do you want to quit?")
-        valueLabel.pack(side='right', expand=True)
-        image = Image.open("multimedia/images/questionmark.png")
-        image = image.resize(
-            (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), Image.Resampling.LANCZOS
-        )
-        image = ImageTk.PhotoImage(image)
-        image_label = ttk.Label(askquit_topframe, image=image)
-        image_label.pack(side='left', expand=True, padx=10, pady=10)
-        image_label.image = image
-        buttonsframe = ttk.Frame(self.big_frame)
-        buttonsframe.pack(side='bottom', expand=True)
-        okButton = ttk.Button(buttonsframe, text="Ok", command=lambda: self.toplevel_quit(self.parent))
-        okButton.pack(side='left', expand=True, pady=10, padx=10)
-        cancelButton = ttk.Button(buttonsframe, text="Cancel", command=self.destroy)
-        cancelButton.pack(side='right', expand=True, pady=10, padx=10)
-
-    def toplevel_quit(self, widget=None):
-        """how to bind a messagebox to toplevel window in python
-           https://stackoverflow.com/questions/17910866/python-3-tkinter-messagebox-with-a-toplevel-as-master"""
-        if widget is not None:
-            if widget == root:
-                print(f'AskQuit>toplevel_quit: Root is now exiting')
-                sys.exit()
-            else:
-                widget.destroy()
-                self.destroy()
-                print(f'AskQuit>toplevel_quit: {widget} & {self} is now destroyed')
-
-        else:
-            self.destroy()
-            print(f'AskQuit>toplevel_quit: {self} is now destroyed')
-
-    def setActive(self):
-        """
-        https://stackoverflow.com/questions/15944533/how-to-keep-the-window-focus-on-new-toplevel-window-in-tkinter
-        """
-        self.big_frame.lift()
-        self.big_frame.focus_force()
-        self.big_frame.grab_set()
-        # self.parent.grab_release()
 
 
 if __name__ == "__main__":
