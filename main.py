@@ -56,7 +56,6 @@ class Coin:
             if name not in Coin.thecoins:  # So as not to be added twice
                 Coin.thecoins.append(self.name)
                 sorted(Coin.thecoins)
-        # TODO make a self.symbol in a dictionary i.e. {Bitcoin: btc}
 
     @staticmethod
     def delete_coin(coin=None):
@@ -111,6 +110,8 @@ class Persistent:
         with Db() as database:
             database.delete_coin(coin=coin)
             logger.debug(f"Coins saved")
+
+        Coin.delete_coin(coin=coin)
 
 
 class Mainpage:
@@ -262,7 +263,7 @@ class Secondpage:
                             tearoff=0)  # Tearoff has to be 0, in order the command to start being posted
         # in position 0 of the menu.
         # self.root.config(menu=self.context) # if this is enabled, the menu will appear in the top left of the window
-        self.context.add_command(label='Modify', command=self.modify)
+        #self.context.add_command(label='Modify', command=self.modify)
         self.context.add_command(label='Delete', command=self.delete)
         self.contextsubmenu = Menu(font='Arial 12', tearoff=0)
         self.context.add_cascade(label='Charts', menu=self.contextsubmenu)
@@ -331,7 +332,7 @@ class Secondpage:
                 if autosave.get() is True:
                     self.controller.persistent.store_to_db()
 
-                logger.debug('Secondpage>insert_coin>The new list: ', Coin.thecoins)
+                logger.debug(f'Secondpage>insert_coin>The new list: {Coin.thecoins}')
                 logger.debug(f'Secondpage>insert_coin>The coin "{temp_text}" was added successfully')
         elif temp_text in Coin.thecoins:
             return messagebox.showinfo('Message', f' Coin named "{temp_text}" already exists.')
@@ -436,17 +437,6 @@ class Secondpage:
     def post_menu(self, event):
         self.context.post(event.x_root, event.y_root)
         logger.debug("Secondpage>post_menu>Emerging Menu from Secondage via right click is now visible")
-
-    def modify(self):
-        """Inserts the selected ID from the coin in the Coin class """
-        #  Solution: https://stackoverflow.com/questions/30614279/tkinter-treeview-get-selected-item-values
-        current = self.tree.focus()
-        logger.debug(f'The selected row: {self.tree.item(current)}')
-        # Pick the first value from the key 'values' from the dictionary self.tree.item(current)
-        current_id_from_coin = self.tree.item(current)['values'][0]
-        logger.debug(f'Selected coin: {current_id_from_coin}')
-        # Add the coin to Coin class
-        CoinWindow(controller=self.controller, operation='modify', coin=current_id_from_coin)
 
     def delete(self):
         """Inserts the selected ID from the coin in the Coin class """
@@ -734,7 +724,6 @@ class CoinWindow:
     def to_act(self):
         if self.operation == 'delete':
             self.window.destroy()
-            Coin.delete_coin(self.name)
             Persistent.delete_coin_from_db(coin=self.name)
             if autosave.get() is True:
                 self.controller.persistent.store_to_db()
