@@ -291,7 +291,7 @@ class Secondpage:
         self.contextsubmenu_eur.add_command(label='Previous 365 days',
                                             command=lambda: self.get_charts(days=365, coin='eur'))
         self.contextsubmenu_eur.add_command(label='Custom days', command=lambda: self.custom_days(coin='eur'))
-        self.contextsubmenu_usd.add_command(
+        self.contextsubmenu_eur.add_command(
             label='Database',
             command=lambda: self.db_charts(
                 coin="euro",
