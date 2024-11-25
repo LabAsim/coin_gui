@@ -5,6 +5,9 @@ import pathlib
 import sys
 import tkinter as tk
 from tkinter import messagebox
+from typing import Any
+
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -106,3 +109,19 @@ def file_exists(dir_path: str | os.PathLike, name: str) -> bool:
         return True
     else:
         return False
+
+
+def dict_factory(cursor, row) -> dict:
+    """See https://docs.python.org/3.10/library/sqlite3.html#how-to-create-and-use-row-factories"""
+    fields = [column[0] for column in cursor.description]
+    return {key: value for key, value in zip(fields, row)}
+
+
+def convert_db_rows_to_dataframe_sorted(rows: list[Any]) -> pd.DataFrame:
+    """Converts the rows to dataframe and sorts the values by date"""
+    df = pd.DataFrame(rows)
+    df["date"] = pd.to_datetime(df["timestamp"], format="mixed", dayfirst=False)
+
+    df = df.sort_values(by='date', ascending=True)
+
+    return df
