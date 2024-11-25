@@ -84,7 +84,7 @@ class Db(ContextDecorator):
         Inserts the prices etc. to the sqlite db.
         """
         query = f'''
-            INSERT OR REPLACE INTO coins(name,timestamp, price, total_volume, marketcap,id, currency) values (?,?,?,?,?,?,?)
+            INSERT OR REPLACE INTO coins(name,timestamp, price,  marketcap, total_volume,id, currency) values (?,?,?,?,?,?,?)
             ON CONFLICT(id) DO NOTHING;
         '''
         df['id'] = df["name"] + "_" + df["Timestamp"]  + "_" + currency
