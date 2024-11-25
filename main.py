@@ -275,7 +275,7 @@ class Secondpage:
         self.contextsubmenu_usd.add_command(label='Previous 7 days', command=lambda: self.get_charts(days=7))
         self.contextsubmenu_usd.add_command(label='Previous 90 days', command=lambda: self.get_charts(days=90))
         self.contextsubmenu_usd.add_command(label='Previous 365 days', command=lambda: self.get_charts(days=365))
-        self.contextsubmenu_usd.add_command(label='Since inception', command=lambda: self.get_charts(days='max'))
+        self.contextsubmenu_usd.add_command(label='Custom days', command=lambda: self.custom_days(coin='usd'))
         self.contextsubmenu_usd.add_command(
             label='Database',
             command=lambda: self.db_charts(
@@ -283,8 +283,6 @@ class Secondpage:
                 cryptocurrency=self.tree.item(self.tree.focus())['values'][0]
             )
         )
-
-        self.contextsubmenu_usd.add_command(label='Custom days', command=lambda: self.custom_days(coin='usd'))
         self.contextsubmenu_eur.add_command(label='Previous 1 day', command=lambda: self.get_charts(days=1, coin='eur'))
         self.contextsubmenu_eur.add_command(label='Previous 7 days',
                                             command=lambda: self.get_charts(days=7, coin='eur'))
@@ -292,10 +290,14 @@ class Secondpage:
                                             command=lambda: self.get_charts(days=90, coin='eur'))
         self.contextsubmenu_eur.add_command(label='Previous 365 days',
                                             command=lambda: self.get_charts(days=365, coin='eur'))
-        self.contextsubmenu_eur.add_command(label='Since inception',
-                                            command=lambda: self.get_charts(days='max', coin='eur'))
         self.contextsubmenu_eur.add_command(label='Custom days', command=lambda: self.custom_days(coin='eur'))
-
+        self.contextsubmenu_usd.add_command(
+            label='Database',
+            command=lambda: self.db_charts(
+                coin="euro",
+                cryptocurrency=self.tree.item(self.tree.focus())['values'][0]
+            )
+        )
         # Tree
         self.tree = ttk.Treeview(self.f1, columns=Secondpage.header, show='headings')
         self.setup_tree()
