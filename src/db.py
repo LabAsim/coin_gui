@@ -4,10 +4,13 @@ import pathlib
 import sqlite3
 import time
 from contextlib import ContextDecorator
+from pprint import pprint
 from typing import Any
 
 import pandas
-from src.helper_funcs import file_exists
+import pandas as pd
+
+from src.helper_funcs import file_exists, dict_factory
 
 logger = logging.getLogger(__name__)
 
@@ -150,11 +153,6 @@ class Db(ContextDecorator):
     def retrieve_available_coins(self) -> list:
         """Retrieves the saved available coins"""
 
-        def dict_factory(cursor, row) -> dict:
-            """See https://docs.python.org/3.10/library/sqlite3.html#how-to-create-and-use-row-factories"""
-            fields = [column[0] for column in cursor.description]
-            return {key: value for key, value in zip(fields, row)}
-
         self.conn.row_factory = dict_factory
         cursor = self.conn.execute(
             '''
@@ -205,6 +203,22 @@ class Db(ContextDecorator):
             [term, term, term]
         )
         self.conn.commit()
+        rows = cursor.fetchall()
+
+        return rows
+
+    def retrieve_coin_values(self, coin: str, crypto: str) -> list[Any]:
+        """
+        Retrieves and returns the saved info of the desired crypto
+        """
+
+        self.conn.row_factory = dict_factory
+        cursor = self.conn.execute(
+            '''
+            SELECT price, timestamp, marketcap, total_volume FROM coins WHERE name == ? AND currency == ?;
+            ''',
+            [crypto, coin]
+        )
         rows = cursor.fetchall()
 
         return rows
