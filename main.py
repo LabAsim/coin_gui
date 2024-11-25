@@ -20,7 +20,7 @@ from pycoingecko import CoinGeckoAPI
 from src.db import Db
 from src.format import color_logging
 from src.helper_classes import CustomMenuBar, AskQuit
-from src.helper_funcs import sortby, str2bool, center
+from src.helper_funcs import sortby, str2bool, center, convert_db_rows_to_dataframe_sorted
 
 cg = CoinGeckoAPI()
 
@@ -276,6 +276,14 @@ class Secondpage:
         self.contextsubmenu_usd.add_command(label='Previous 90 days', command=lambda: self.get_charts(days=90))
         self.contextsubmenu_usd.add_command(label='Previous 365 days', command=lambda: self.get_charts(days=365))
         self.contextsubmenu_usd.add_command(label='Since inception', command=lambda: self.get_charts(days='max'))
+        self.contextsubmenu_usd.add_command(
+            label='Database',
+            command=lambda: self.db_charts(
+                coin="usd",
+                cryptocurrency=self.tree.item(self.tree.focus())['values'][0]
+            )
+        )
+
         self.contextsubmenu_usd.add_command(label='Custom days', command=lambda: self.custom_days(coin='usd'))
         self.contextsubmenu_eur.add_command(label='Previous 1 day', command=lambda: self.get_charts(days=1, coin='eur'))
         self.contextsubmenu_eur.add_command(label='Previous 7 days',
@@ -287,6 +295,7 @@ class Secondpage:
         self.contextsubmenu_eur.add_command(label='Since inception',
                                             command=lambda: self.get_charts(days='max', coin='eur'))
         self.contextsubmenu_eur.add_command(label='Custom days', command=lambda: self.custom_days(coin='eur'))
+
         # Tree
         self.tree = ttk.Treeview(self.f1, columns=Secondpage.header, show='headings')
         self.setup_tree()
@@ -547,7 +556,9 @@ class Secondpage:
         current_id_from_coin = self.tree.item(current)['values'][0]
         logger.debug(f'Selected coin: {current_id_from_coin}')
         try:
-            data = cg.get_coin_market_chart_by_id(id=f'{current_id_from_coin}', vs_currency=f'{coin}', days=f'{days}')
+            data = cg.get_coin_market_chart_by_id(
+                id=f'{current_id_from_coin}', vs_currency=f'{coin}', days=f'{days}'
+            )
         except ValueError:
             logger.exception(msg="Error fetching data from Coingecko")
             return
@@ -641,6 +652,55 @@ class Secondpage:
         self.canvas.get_tk_widget().pack()
         # TODO: add RSI in charts https://stackoverflow.com/questions/57006437/calculate-rsi-indicator-from-pandas-dataframe
         center(self.figure_toplevel, root)
+
+    def db_charts(self, coin="usd", cryptocurrency="bitcoin") -> None:
+        """Draws a plot based on saved coin price/marketcap/total volumes values"""
+        with Db() as database:
+            rows = database.retrieve_coin_values(
+                coin=coin, crypto=cryptocurrency
+            )
+            df = convert_db_rows_to_dataframe_sorted(rows=rows)
+
+            # Clears the figure, so as not to be overlapped by a previous one.
+            if self.figure is not None:
+                self.figure.clf()
+            current = self.tree.focus()
+            self.figure_toplevel = tk.Toplevel()
+            self.figure_toplevel.protocol(
+                name="WM_DELETE_WINDOW", func=lambda: AskQuit(self.figure_toplevel)
+            )
+            self.fig_frame = ttk.Frame(self.figure_toplevel)
+            self.fig_frame.pack(expand=True, fill='both')
+
+            self.figure = plt.figure(1, figsize=(15, 15), dpi=100)
+            ax1 = self.figure.add_subplot(211)
+            ax1.set_title(f'{cryptocurrency.capitalize()} metrics')
+            ax1.set_ylabel(f'{coin.capitalize()}')
+            plt.plot(df["date"], df["price"], label='Price', color='blue')
+            plt.xticks(rotation=45)
+            # Legend instructions: https://matplotlib.org/3.5.0/api/_as_gen/matplotlib.pyplot.legend.html
+            ax1.legend(loc=2)
+            ax3 = ax1.twinx()
+            ax3.set_ylabel(f'Per million {coin.capitalize()}')
+            ax3.plot(
+                df['date'],
+                df['total_volume'],
+                label='Total volume',
+                color='red'
+            )  # 2nd line in the first subplot
+            plt.legend(loc=1)
+            ax2 = self.figure.add_subplot(212)
+            ax2.plot(df["date"], df["marketcap"])
+            ax2.set_title('Marketcap')
+            ax2.set_ylabel(f'Per million {coin.capitalize()}')
+
+            # ax2.set_xticks(df["date"][::120])
+            plt.xticks(rotation=45)
+            self.canvas = FigureCanvasTkAgg(self.figure, master=self.fig_frame)
+            self.canvas.draw()
+            # placing the canvas on the Tkinter window
+            self.canvas.get_tk_widget().pack()
+            center(self.figure_toplevel, root)
 
     def toplevel_quit(self, widget):
         """how to bind a messagebox to toplevel window in python
