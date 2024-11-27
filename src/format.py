@@ -1,7 +1,10 @@
 import copy
 import logging
+import os.path
 
 import colorama
+
+from settings import ROOT_PATH
 
 
 class LoggingFormatter(logging.Formatter):
@@ -25,8 +28,10 @@ class LoggingFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def color_logging(level: int) -> logging.StreamHandler:
+def color_logging(level: int, save_logs: bool = False) -> list[logging.StreamHandler | logging.FileHandler]:
     """See https://docs.python.org/3/howto/logging-cookbook.html#logging-cookbook"""
+
+    consoles_to_return = []
 
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
@@ -36,4 +41,15 @@ def color_logging(level: int) -> logging.StreamHandler:
     formatter = LoggingFormatter()
     # tell the handler to use this format
     console.setFormatter(formatter)
-    return console
+
+    consoles_to_return.append(console)
+
+    if save_logs is True:
+        fh = logging.FileHandler(filename=os.path.join(ROOT_PATH, 'logs.txt'))
+        fh.setLevel(level=level)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh.setFormatter(formatter)
+
+        consoles_to_return.append(fh)
+
+    return consoles_to_return
