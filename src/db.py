@@ -1,15 +1,13 @@
 import logging
 import os.path
-import pathlib
 import sqlite3
 import time
 from contextlib import ContextDecorator
-from pprint import pprint
 from typing import Any
 
-import pandas
 import pandas as pd
 
+from settings import ROOT_PATH
 from src.helper_funcs import file_exists, dict_factory
 
 logger = logging.getLogger(__name__)
@@ -19,9 +17,7 @@ class Db(ContextDecorator):
     """Manages the sqlite db"""
 
     def __init__(self) -> None:
-        path = pathlib.Path(os.path.abspath(__file__))
-        # That's the root path when the app is frozen using Pyinstaller
-        root_path = path.parent.parent.parent.parent.parent.absolute()
+        root_path = ROOT_PATH
         logger.debug(f"{root_path=}")
 
         self.conn = sqlite3.connect(database=os.path.join(root_path, "coins.db")) \
@@ -79,7 +75,7 @@ class Db(ContextDecorator):
         )
         self.conn.commit()
 
-    def insert_coin_values(self, df: pandas.DataFrame, currency: str) -> None:
+    def insert_coin_values(self, df: pd.DataFrame, currency: str) -> None:
         """
         Inserts the prices etc. to the sqlite db.
         """
@@ -144,7 +140,7 @@ class Db(ContextDecorator):
 
     def save_all_available_coins(self, coins) -> None:
 
-        coins = pandas.DataFrame(coins)
+        coins = pd.DataFrame(coins)
         # logger.debug(f"{coins=}")
         coins.to_sql(
             name="available_coins", con=self.conn, if_exists="replace", index=False
