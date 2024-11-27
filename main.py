@@ -36,11 +36,11 @@ if __name__ == "__main__":
     logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
     logging.getLogger("matplotlib.category").setLevel(logging.WARNING)
     logging.getLogger("urllib3.connectionpool").setLevel(logging.WARNING)
-    console = color_logging(level=logging.DEBUG)
+    consoles = color_logging(level=logging.DEBUG)
     logging.basicConfig(
         level=logging.DEBUG,
         force=True,
-        handlers=[console],
+        handlers=consoles,
     )  # Force is needed here to re config logging
     # Init should be here so as the colors be rendered properly in fly.io
     colorama.init(convert=True)
@@ -1186,8 +1186,6 @@ class AvailableCoinsMultiColumnTree:
         self.controller.persistent.store_to_db()
         # Call the Secondpage.fill_box in order for the coin to be shown
         self.controller.frames["Coin List"].fill_box()
-
-
 
 
 if __name__ == "__main__":
