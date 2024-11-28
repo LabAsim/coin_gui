@@ -158,7 +158,7 @@ class Db(ContextDecorator):
         rows = cursor.fetchall()
         return rows
 
-    def check_settings_time(self) -> float:
+    def check_settings_time(self, row_id: str) -> float:
         """Checks if the settings time is today or a timestamp in the past"""
 
         cursor = self.conn.execute(
@@ -170,18 +170,18 @@ class Db(ContextDecorator):
         rows = cursor.fetchall()
         # logger.debug(f"{rows=}")
         for row in rows:
-            if "available_coins_retrieved" in row:
+            if row_id in row:
                 return row[1]
         else:
             return 0
 
-    def save_settings_time(self) -> None:
+    def save_settings_time(self, _id: str) -> None:
         """Save the setting name and the unix timestamp"""
         self.conn.execute(
             '''
             INSERT OR REPLACE INTO settings(id,unix_timestamp) values(?,?)
             ''',
-            ["available_coins_retrieved", time.time()]
+            [_id, time.time()]
         )
         self.conn.commit()
 

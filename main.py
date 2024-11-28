@@ -911,11 +911,13 @@ class App:
     def save_retrieve_available_coins(self) -> list:
         """Checks if the saved info is old and replaces it with a new list of coins"""
         with Db() as database:
-            available_coins_retrieved_settings_time = database.check_settings_time()
+            available_coins_retrieved_settings_time = database.check_settings_time(
+                row_id="available_coins_retrieved"
+            )
             if (
                     time.time() - available_coins_retrieved_settings_time > 86400
             ):
-                database.save_settings_time()
+                database.save_settings_time(_id="available_coins_retrieved")
                 available_coins_list = cg.get_coins_list()
                 logger.debug(f"Got a new coin list")
                 database.save_all_available_coins(coins=available_coins_list)
