@@ -1,6 +1,12 @@
 *example*
 coins*
 .idea
+logs.txt
+autosave*
+!src/autosave/autosave.py
+!src/autosave/autosave_pyinstaller.py
+start_hidden.exe
+settings.py
 
 ### PythonVanilla template
 # Byte-compiled / optimized / DLL files
