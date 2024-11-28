@@ -3,7 +3,7 @@ import os.path
 import sqlite3
 import time
 from contextlib import ContextDecorator
-from typing import Any
+from typing import Any, Callable
 
 import pandas as pd
 
@@ -83,7 +83,7 @@ class Db(ContextDecorator):
             INSERT OR REPLACE INTO coins(name,timestamp, price,  marketcap, total_volume,id, currency) values (?,?,?,?,?,?,?)
             ON CONFLICT(id) DO NOTHING;
         '''
-        df['id'] = df["name"] + "_" + df["Timestamp"]  + "_" + currency
+        df['id'] = df["name"] + "_" + df["Timestamp"] + "_" + currency
         df["currency"] = currency
         # logging.debug(f"{df.to_records(index=False)=}")
         self.conn.executemany(query, df.to_records(index=False))
@@ -218,6 +218,26 @@ class Db(ContextDecorator):
         rows = cursor.fetchall()
 
         return rows
+
+    def wrap_autosave(self, func: Callable, row_id: str) -> None:
+        """
+        Checks if timestamp is older than a day and saves the timestamp.
+        If it's not, it does not execute the func
+        """
+
+        available_coins_retrieved_settings_time = self.check_settings_time(
+            row_id=row_id
+        )
+        if (
+                time.time() - available_coins_retrieved_settings_time > 86400
+        ):
+            self.save_settings_time(_id=row_id)
+            logger.debug(f"{time.time()=}")
+        else:
+            logger.debug(f"The script run in less than a day, stopping")
+            return
+        logger.debug(f"Running {func=}")
+        func()
 
     def __enter__(self):
         """https://stackoverflow.com/a/42623484"""
