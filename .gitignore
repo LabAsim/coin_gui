@@ -2,10 +2,10 @@
 coins*
 .idea
 logs.txt
-autosave*
 !src/autosave/autosave.py
 !src/autosave/autosave_pyinstaller.py
 start_hidden.exe
+autosave.exe
 settings.py
 
 ### PythonVanilla template
