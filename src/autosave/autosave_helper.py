@@ -81,6 +81,12 @@ def get_coingecko_values(cryptocurrency: str, coin: str, days: int) -> pd.DataFr
     # logger.debug(f"{df_total=}")
 
 
+def get_save_values(crypto: str, coin: str, days: int, database: Db) -> None:
+    """Gets the values from coincecko and inserts them to the db"""
+    df = get_coingecko_values(cryptocurrency=crypto.name, coin=coin, days=days)
+    database.insert_coin_values(df=df, currency=coin)
+
+
 def iterate_coins() -> None:
     cryptocoins = load_coins()
 
@@ -88,13 +94,13 @@ def iterate_coins() -> None:
         for crypto in cryptocoins.itertuples():
             for coin in ("usd", "eur"):
                 for days in (1, 7, 90, 365):
-                    df = get_coingecko_values(cryptocurrency=crypto.name, coin=coin, days=days)
-                    database.wrap_autosave(
-                        func=database.insert_coin_values,
+                    flag = database.wrap_autosave(
+                        func=get_save_values,
                         row_id=f"autosave_daily_timestamp_{crypto.name}_{coin}_{days}",
-                        args=[df, coin]
+                        args=[crypto, coin, days, database]
                     )
-                    time.sleep(60)
+                    if flag is True:
+                        time.sleep(60)
 
 
 def start_hidden() -> None:
