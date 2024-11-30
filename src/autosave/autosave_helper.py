@@ -25,7 +25,7 @@ def load_coins() -> pd.DataFrame:
         return df
 
 
-def get_coingecko_values(cryptocurrency: str, coin: str, days: int) -> None:
+def get_coingecko_values(cryptocurrency: str, coin: str, days: int) -> pd.DataFrame:
     try:
         data = cg.get_coin_market_chart_by_id(
             id=f'{cryptocurrency}', vs_currency=f'{coin}', days=f'{days}'
@@ -69,25 +69,32 @@ def get_coingecko_values(cryptocurrency: str, coin: str, days: int) -> None:
     df3 = pd.DataFrame(data['total_volumes'], columns=['Timestamp', 'Total volumes'])
 
     # Merge the dataframes and insert them into the db
-    database = Db()
+
     df_ = pd.DataFrame({"name": [f"{cryptocurrency}" for i in range(0, len(df.index))]})
     df_total = df.copy()
     df_total = df_.join(df_total)
     # logger.debug(f"{df_total=}")
     df_total = df_total.merge(df2, how="left", on="Timestamp")
     df_total = df_total.merge(df3, how="left", on="Timestamp")
+
+    return df_total
     # logger.debug(f"{df_total=}")
-    database.insert_coin_values(df=df_total, currency=coin)
 
 
 def iterate_coins() -> None:
     cryptocoins = load_coins()
 
-    for crypto in cryptocoins.itertuples():
-        for coin in ("usd", "eur"):
-            for days in (1, 7, 90, 365):
-                get_coingecko_values(cryptocurrency=crypto.name, coin=coin, days=days)
-                time.sleep(60)
+    with Db() as database:
+        for crypto in cryptocoins.itertuples():
+            for coin in ("usd", "eur"):
+                for days in (1, 7, 90, 365):
+                    df = get_coingecko_values(cryptocurrency=crypto.name, coin=coin, days=days)
+                    database.wrap_autosave(
+                        func=database.insert_coin_values,
+                        row_id=f"autosave_daily_timestamp_{crypto.name}_{coin}_{days}",
+                        args=[df, coin]
+                    )
+                    time.sleep(60)
 
 
 def start_hidden() -> None:
@@ -118,4 +125,3 @@ def start_hidden() -> None:
     finally:
         logger.info("Exiting now..")
         sys.exit()
-
