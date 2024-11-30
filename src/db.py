@@ -219,7 +219,7 @@ class Db(ContextDecorator):
 
         return rows
 
-    def wrap_autosave(self, func: Callable, row_id: str) -> None:
+    def wrap_autosave(self, row_id: str, func: Callable, args: list) -> None:
         """
         Checks if timestamp is older than a day and saves the timestamp.
         If it's not, it does not execute the func
@@ -229,7 +229,7 @@ class Db(ContextDecorator):
             row_id=row_id
         )
         if (
-                time.time() - available_coins_retrieved_settings_time > 86400
+                time.time() - available_coins_retrieved_settings_time > (86400/2)
         ):
             self.save_settings_time(_id=row_id)
             logger.debug(f"{time.time()=}")
@@ -237,7 +237,7 @@ class Db(ContextDecorator):
             logger.debug(f"The script run in less than a day, stopping")
             return
         logger.debug(f"Running {func=}")
-        func()
+        func(*args)
 
     def __enter__(self):
         """https://stackoverflow.com/a/42623484"""
