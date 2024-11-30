@@ -23,11 +23,7 @@ if __name__ == "__main__":
             handlers=consoles
         )
         colorama.init(convert=True)
-        with Db() as database:
-            database.wrap_autosave(
-                func=iterate_coins,
-                row_id="autosave_daily_timestamp"
-            )
+        iterate_coins()
     except (PermissionError, Exception) as err:
         print(f"{err=}")
         print(f"{exc_info()=}")
