@@ -280,7 +280,10 @@ class Secondpage:
             label='Database',
             command=lambda: self.db_charts(
                 coin="usd",
-                cryptocurrency=self.tree.item(self.tree.focus())['values'][0]
+                cryptocurrency=self.tree.item(self.tree.focus())['values'][0],
+                start_date="2000-01-01",
+                end_date=datetime.now().strftime("%Y-%M-%d")
+
             )
         )
         self.contextsubmenu_eur.add_command(label='Previous 1 day', command=lambda: self.get_charts(days=1, coin='eur'))
@@ -295,7 +298,9 @@ class Secondpage:
             label='Database',
             command=lambda: self.db_charts(
                 coin="euro",
-                cryptocurrency=self.tree.item(self.tree.focus())['values'][0]
+                cryptocurrency=self.tree.item(self.tree.focus())['values'][0],
+                start_date="2000-01-01",
+                end_date=datetime.now().strftime("%Y-%M-%d")
             )
         )
         self.context.add_command(label='Database', command=self.delete)
@@ -662,11 +667,16 @@ class Secondpage:
         # TODO: add RSI in charts https://stackoverflow.com/questions/57006437/calculate-rsi-indicator-from-pandas-dataframe
         center(self.figure_toplevel, root)
 
-    def db_charts(self, coin="usd", cryptocurrency="bitcoin") -> None:
+    def db_charts(
+            self, start_date: str, end_date: str, coin: str, cryptocurrency: str
+    ) -> None:
         """Draws a plot based on saved coin price/marketcap/total volumes values"""
         with Db() as database:
-            rows = database.retrieve_coin_values(
-                coin=coin, crypto=cryptocurrency
+            rows = database.retrieve_coin_values_time_range(
+                coin=coin,
+                crypto=cryptocurrency,
+                start_date=start_date,
+                end_date=end_date
             )
             df = convert_db_rows_to_dataframe_sorted(rows=rows)
 
