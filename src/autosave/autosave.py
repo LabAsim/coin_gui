@@ -9,7 +9,6 @@ from time import sleep
 import colorama
 
 from autosave_helper import iterate_coins
-from src.db import Db
 from src.format import color_logging
 
 logger = logging.getLogger(__name__)

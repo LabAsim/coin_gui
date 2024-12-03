@@ -298,6 +298,7 @@ class Secondpage:
                 cryptocurrency=self.tree.item(self.tree.focus())['values'][0]
             )
         )
+        self.context.add_command(label='Database', command=self.delete)
         # Tree
         self.tree = ttk.Treeview(self.f1, columns=Secondpage.header, show='headings')
         self.setup_tree()
@@ -530,9 +531,8 @@ class Secondpage:
             print(f'Secondpage>fill_box_with_prices> '
                   f'Warning: Loading the searched coin list and their prices has failed! {err}')
 
-    def get_charts(self, coin='usd', days: str | int = str(90)):
-        """Draws a plot containing price, marketcap and total volumes for the previous 90 days.
-           if days>90, coingecko sends data in days. If <90 data intervals are smaller."""
+    def prepare_figure_toplevel(self) -> None:
+        """Destroys and clears the toplevel & frame for the figure to be drawn"""
         # Destroy the toplevel, so as not to be overlapped by a previous one.
         if self.figure_toplevel or self.fig_frame or self.canvas is not None:
             self.figure_toplevel.destroy()
@@ -547,12 +547,19 @@ class Secondpage:
         # Clears the figure, so as not to be overlapped by a previous one.
         if self.figure is not None:
             self.figure.clf()
-        current = self.tree.focus()
+
         self.figure_toplevel = tk.Toplevel()
         self.figure_toplevel.protocol("WM_DELETE_WINDOW", lambda: AskQuit(self.figure_toplevel))
         self.fig_frame = ttk.Frame(self.figure_toplevel)
         self.fig_frame.pack(expand=True, fill='both')
 
+    def get_charts(self, coin='usd', days: str | int = str(90)):
+        """Draws a plot containing price, marketcap and total volumes for the previous 90 days.
+           if days>90, coingecko sends data in days. If <90 data intervals are smaller."""
+
+        self.prepare_figure_toplevel()
+
+        current = self.tree.focus()
         logger.debug(f'The selected row: {self.tree.item(current)}')
         # Pick the first value from the key 'values' from the dictionary self.tree.item(current)
         current_id_from_coin = self.tree.item(current)['values'][0]
