@@ -203,17 +203,20 @@ class Db(ContextDecorator):
 
         return rows
 
-    def retrieve_coin_values(self, coin: str, crypto: str) -> list[Any]:
+    def retrieve_coin_values_time_range(
+            self, coin: str, crypto: str, start_date: str, end_date: str
+    ) -> list[Any]:
         """
-        Retrieves and returns the saved info of the desired crypto
+        Retrieves and returns the saved info of the desired crypto based on a datetime range
         """
 
         self.conn.row_factory = dict_factory
         cursor = self.conn.execute(
             '''
-            SELECT price, timestamp, marketcap, total_volume FROM coins WHERE name == ? AND currency == ?;
+            SELECT price, timestamp, marketcap, total_volume FROM coins WHERE name == ? AND currency == ? AND
+            timestamp BETWEEN ? AND ?;
             ''',
-            [crypto, coin]
+            [crypto, coin, start_date, end_date]
         )
         rows = cursor.fetchall()
 
@@ -229,7 +232,7 @@ class Db(ContextDecorator):
             row_id=row_id
         )
         if not (
-                time.time() - available_coins_retrieved_settings_time > (86400/2)
+                time.time() - available_coins_retrieved_settings_time > (86400 / 2)
         ):
             logger.debug(f"The script ran in less than a day, skipping")
             return False
