@@ -7,7 +7,7 @@ import sys
 import time
 import tkinter as tk
 from datetime import datetime
-from tkinter import messagebox, simpledialog, Menu, ttk
+from tkinter import messagebox, simpledialog, Menu, ttk, Toplevel
 from tkinter.filedialog import askopenfile
 
 import colorama
@@ -269,15 +269,43 @@ class Secondpage:
         self.context.add_cascade(label='Charts', menu=self.contextsubmenu)
         self.contextsubmenu_usd = Menu(font='Arial 12', tearoff=0)
         self.contextsubmenu_eur = Menu(font='Arial 12', tearoff=0)
+        self.contextsubmenu_db = Menu(font='Arial 12', tearoff=0)
         self.contextsubmenu.add_cascade(label='Usd', menu=self.contextsubmenu_usd)
         self.contextsubmenu.add_cascade(label='Euro', menu=self.contextsubmenu_eur)
+        self.contextsubmenu.add_cascade(label='Database', menu=self.contextsubmenu_db)
         self.contextsubmenu_usd.add_command(label='Previous 1 day', command=lambda: self.get_charts(days=1))
         self.contextsubmenu_usd.add_command(label='Previous 7 days', command=lambda: self.get_charts(days=7))
         self.contextsubmenu_usd.add_command(label='Previous 90 days', command=lambda: self.get_charts(days=90))
         self.contextsubmenu_usd.add_command(label='Previous 365 days', command=lambda: self.get_charts(days=365))
         self.contextsubmenu_usd.add_command(label='Custom days', command=lambda: self.custom_days(coin='usd'))
-        self.contextsubmenu_usd.add_command(
-            label='Database',
+
+        self.contextsubmenu_eur.add_command(label='Previous 1 day', command=lambda: self.get_charts(days=1, coin='eur'))
+        self.contextsubmenu_eur.add_command(label='Previous 7 days',
+                                            command=lambda: self.get_charts(days=7, coin='eur'))
+        self.contextsubmenu_eur.add_command(label='Previous 90 days',
+                                            command=lambda: self.get_charts(days=90, coin='eur'))
+        self.contextsubmenu_eur.add_command(label='Previous 365 days',
+                                            command=lambda: self.get_charts(days=365, coin='eur'))
+        self.contextsubmenu_eur.add_command(
+            label='Custom days',
+            command=lambda: self.custom_days(
+                coin='eur'
+            )
+        )
+
+        self.contextsubmenu_db.add_command(
+            label='Custom date',
+            command=lambda: self.db_charts(
+
+                *self.custom_date(
+                    coin="usd",
+                    cryptocurrency=self.tree.item(self.tree.focus())['values'][0]
+
+                )
+            )
+        )
+        self.contextsubmenu_db.add_command(
+            label='Since inception',
             command=lambda: self.db_charts(
                 coin="usd",
                 cryptocurrency=self.tree.item(self.tree.focus())['values'][0],
@@ -286,24 +314,6 @@ class Secondpage:
 
             )
         )
-        self.contextsubmenu_eur.add_command(label='Previous 1 day', command=lambda: self.get_charts(days=1, coin='eur'))
-        self.contextsubmenu_eur.add_command(label='Previous 7 days',
-                                            command=lambda: self.get_charts(days=7, coin='eur'))
-        self.contextsubmenu_eur.add_command(label='Previous 90 days',
-                                            command=lambda: self.get_charts(days=90, coin='eur'))
-        self.contextsubmenu_eur.add_command(label='Previous 365 days',
-                                            command=lambda: self.get_charts(days=365, coin='eur'))
-        self.contextsubmenu_eur.add_command(label='Custom days', command=lambda: self.custom_days(coin='eur'))
-        self.contextsubmenu_eur.add_command(
-            label='Database',
-            command=lambda: self.db_charts(
-                coin="euro",
-                cryptocurrency=self.tree.item(self.tree.focus())['values'][0],
-                start_date="2000-01-01",
-                end_date=datetime.now().strftime("%Y-%M-%d")
-            )
-        )
-        self.context.add_command(label='Database', command=self.delete)
         # Tree
         self.tree = ttk.Treeview(self.f1, columns=Secondpage.header, show='headings')
         self.setup_tree()
@@ -732,6 +742,28 @@ class Secondpage:
         """Prompt a dialog for the user to enter the desired custom days"""
         custom_days_input = simpledialog.askinteger(title='Days', prompt='Define days', parent=self.tree, minvalue=0)
         self.get_charts(coin=coin, days=str(custom_days_input))
+
+    def custom_date(
+            self, coin: str, cryptocurrency: str
+    ) -> tuple[str | None, str | None, str, str]:
+        """prompt to select dates"""
+
+        start_date = simpledialog.askstring(
+            title="Start date",
+            prompt="YYYY-MM-DD",
+            parent=self.controller.root,
+            initialvalue="2010-01-01"
+        )
+
+        end_date = simpledialog.askstring(
+            title="Start date",
+            prompt="YYYY-MM-DD",
+            parent=self.controller.root,
+            initialvalue=datetime.now().strftime("%Y-%m-%d"),
+            show=""
+        )
+
+        return start_date, end_date, coin, cryptocurrency
 
     def refresh(self):
         """ Destroys the current frame in Secondpage and initiates a new one"""
