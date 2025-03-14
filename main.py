@@ -6,7 +6,7 @@ import os
 import sys
 import time
 import tkinter as tk
-from datetime import datetime
+from datetime import datetime, timedelta
 from tkinter import messagebox, simpledialog, Menu, ttk, Toplevel
 from tkinter.filedialog import askopenfile
 
@@ -294,9 +294,59 @@ class Secondpage:
         )
 
         self.contextsubmenu_db.add_command(
+            label='Previous 1 day',
+            command=lambda: self.db_charts(
+                coin="usd",
+                cryptocurrency=self.tree.item(self.tree.focus())['values'][0],
+                start_date=(datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
+                end_date=datetime.now().strftime("%Y-%m-%d")
+            )
+        )
+        self.contextsubmenu_db.add_command(
+            label='Previous 7 days',
+            command=lambda: self.db_charts(
+                coin="usd",
+                cryptocurrency=self.tree.item(self.tree.focus())['values'][0],
+                start_date=(datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d"),
+                end_date=datetime.now().strftime("%Y-%m-%d")
+            )
+        )
+        self.contextsubmenu_db.add_command(
+            label='Previous 30 days',
+            command=lambda: self.db_charts(
+                coin="usd",
+                cryptocurrency=self.tree.item(self.tree.focus())['values'][0],
+                start_date=(datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d"),
+                end_date=datetime.now().strftime("%Y-%m-%d")
+            )
+        )
+        self.contextsubmenu_db.add_command(
+            label='Previous 90 days',
+            command=lambda: self.db_charts(
+                coin="usd",
+                cryptocurrency=self.tree.item(self.tree.focus())['values'][0],
+                start_date=(datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d"),
+                end_date=datetime.now().strftime("%Y-%m-%d")
+            )
+        )
+        self.contextsubmenu_db.add_command(
+            label='Previous 360 days',
+            command=lambda: self.db_charts(
+                coin="usd",
+                cryptocurrency=self.tree.item(self.tree.focus())['values'][0],
+                start_date=(datetime.now() - timedelta(days=360)).strftime("%Y-%m-%d"),
+                end_date=datetime.now().strftime("%Y-%m-%d")
+            )
+        )
+        self.contextsubmenu_db.add_command(
+            label='Custom days',
+            command=lambda: self.custom_days_db(
+                coin='usd'
+            )
+        )
+        self.contextsubmenu_db.add_command(
             label='Custom date',
             command=lambda: self.db_charts(
-
                 *self.custom_date(
                     coin="usd",
                     cryptocurrency=self.tree.item(self.tree.focus())['values'][0]
@@ -310,7 +360,7 @@ class Secondpage:
                 coin="usd",
                 cryptocurrency=self.tree.item(self.tree.focus())['values'][0],
                 start_date="2000-01-01",
-                end_date=datetime.now().strftime("%Y-%M-%d")
+                end_date=datetime.now().strftime("%Y-%m-%d")
 
             )
         )
@@ -681,6 +731,7 @@ class Secondpage:
             self, start_date: str, end_date: str, coin: str, cryptocurrency: str
     ) -> None:
         """Draws a plot based on saved coin price/marketcap/total volumes values"""
+        logger.debug(f"{start_date=}, {end_date=}, {coin=}, {cryptocurrency=}")
         with Db() as database:
             rows = database.retrieve_coin_values_time_range(
                 coin=coin,
@@ -688,6 +739,9 @@ class Secondpage:
                 start_date=start_date,
                 end_date=end_date
             )
+            if len(rows) == 0:
+                logger.debug(f"{rows=}")
+                raise ValueError("No data found in the database")
             df = convert_db_rows_to_dataframe_sorted(rows=rows)
 
             # Clears the figure, so as not to be overlapped by a previous one.
@@ -742,6 +796,17 @@ class Secondpage:
         """Prompt a dialog for the user to enter the desired custom days"""
         custom_days_input = simpledialog.askinteger(title='Days', prompt='Define days', parent=self.tree, minvalue=0)
         self.get_charts(coin=coin, days=str(custom_days_input))
+
+    def custom_days_db(self, coin='usd'):
+        """Prompt a dialog for the user to enter the desired custom days"""
+        custom_days_input = simpledialog.askinteger(title='Days', prompt='Define days', parent=self.tree, minvalue=0)
+        self.db_charts(
+            start_date=(datetime.now() - timedelta(days=custom_days_input)).strftime("%Y-%m-%d"),
+            end_date=datetime.now().strftime("%Y-%m-%d"),
+            coin=coin,
+            cryptocurrency=self.tree.item(self.tree.focus())['values'][0]
+        )
+
 
     def custom_date(
             self, coin: str, cryptocurrency: str
